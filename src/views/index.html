@@ -6,48 +6,113 @@
   </head>
 
   <body>
+
+    
+
     <ul class="pages">
+
+      <!-- Chat page -- >
       <li class="chat page">
+
+        <!-- Top banner -->
         <div id="banner">
           <div id="banner-content">
             ThiS Is A ChAtRoOm!
           </div>
         </div>
+
+        <!-- Area for chat -->
         <div class="chatArea">
-          <ul class="messages"></ul>
+          <ul id="messages"></ul>
         </div>
+
+        <!-- Active users -->
         <div class="active">
           <h2>Active Users</h3>
-          <ul class="users"></ul>
+          <ul class="users" id="users"></ul>
         </div>
+
+        <!-- Groups -->
         <div class="groups">
           
         </div>
+
+        <!-- Chat message entry box -->
         <form action="">
-          <input class="inputMessage" id="m" autocomplete="off" placeholder="type here..." />
+          <input class="inputMessage" id="m" autocomplete="off" placeholder="Type here..." />
         </form>
       </li>
-      <li class="login page">
-        <div class="nameForm">
-          <h3 class="title">What's your nickname?</h3>
-          <input class="usernameInput" type="text" maxlength="14" />
-        </div>
-      </li>    
+      <!-- Handling user login -->
+        <li class="login page" id="usernamePage">
+          <div class="nameForm">
+            <h3 class="title">What's your nickname?</h3>
+            <input class="usernameInput" id="usernameInput" type="text" maxlength="14" placeholder="Username"/>
+            <br/>
+            <input class="usernameInput" id="passwordInput" type="password" onkeydown="submitLogin()" placeholder="Password" />
+          </div>
+        </li>
     </ul>
     
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
+
+      var username
+      var socket = io();
+
+      // Creating a name
+      function submitLogin() {
+        
+        if(event.key === 'Enter') {
+            
+            username = $('#usernameInput').val()
+
+            // Lets server know this users username
+            socket.emit('user connect', 
+              {
+                username : $('#usernameInput').val(),
+                password : $('#passwordInput').val()
+              }
+            )   
+        }
+      }
+
+      // Valid username/password
+      socket.on('valid login', function(chatroomName){
+          
+          $('#usernamePage').fadeOut('slow')
+          socket.emit('join room', chatroomName)
+      })
+
+      // On receiving a chat message
+      socket.on('chat message', function(msg){
+
+        $('#messages').append($('<li>').text(msg))
+        window.scrollTo(0, document.body.scrollHeight)
+      });
+
+      // Users logging in or out
+      socket.on('user state update', function(usernames){
+        $('#users').empty()
+
+        for (var i = 0; i < usernames.length; i++) {
+          $('#users').append($('<li id="' + usernames[i] + '">').text(usernames[i]))
+        }
+      })
+
       $(function () {
-        var socket = io();
+
+        // On submitting a chat message
         $('form').submit(function(){
-          socket.emit('chat message', $('#m').val());
-          $('#m').val('');
-          return false;
-        });
-        socket.on('chat message', function(msg){
-          $('#messages').append($('<li>').text(msg));
-          window.scrollTo(0, document.body.scrollHeight);
+          socket.emit('chat message', 
+            {
+
+              username : username,
+              message: $('#m').val()
+
+            });
+          $('#m').val('')
+          return false
         });
       });          
     </script>
