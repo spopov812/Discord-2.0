@@ -69,5 +69,19 @@ module.exports = {
 
 			return callback(res)
 		})
+	},
+
+	// Will save the last chat room a user was in when they log out
+	saveLastRoom : function(username, chatroomName) {
+
+		var query = "UPDATE users SET lastchatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '" + chatroomName + "') WHERE username = '" + username + "'"
+
+		// Save last room in DB
+		client.query(query, (err, res) => {
+
+			if (err) {
+	    		console.log(err.stack)
+	  		}
+		})
 	}
 }

@@ -62,6 +62,8 @@ io.on('connection', function(socket){
 		});
 
 		io.to(currentChatroom).emit('user state update', chatRoomsToUsers[currentChatroom])
+
+		DB.saveLastRoom(socketUsername, currentChatroom)
 	})
 
 	// On receiving a chat message
