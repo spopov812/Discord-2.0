@@ -3,6 +3,8 @@
   <head>
     <title>Socket.IO chat</title>
     <link rel="stylesheet" type="text/css" href="../css/index.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/flatly/bootstrap.min.css">
   </head>
 
   <body>
@@ -105,7 +107,7 @@
           for (var i = 0; i < info['chatrooms'].length; i++) {
 
             chatroomName = info['chatrooms'][i]
-            src = base_path + 'icon.png'
+            src = base_path + chatroomName.replace(" ", "_") + '_icon.png'
 
             html = '<img src="' + src + '" ' + options + ' onclick="switchChatroom(this.id)" id="' + chatroomName + '" /><br />'
             console.log("Setting html- " + html)
