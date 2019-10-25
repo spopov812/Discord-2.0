@@ -17,8 +17,9 @@
         <!-- Top banner -->
         <div id="banner">
           <div id="banner-content">
-            ThiS Is A ChAtRoOm!
+            Welcome to Discord 2.0!
           </div>
+          <h2 id="currentRoom"></h2>
         </div>
 
         <!-- Area for chat -->
@@ -28,13 +29,15 @@
 
         <!-- Active users -->
         <div class="active">
-          <h2>Active Users</h3>
+          <h2>Active Users</h2>
           <ul class="users" id="users"></ul>
         </div>
 
         <!-- Groups -->
-        <div class="groups">
-          
+        <div class="groupArea">
+          <h2>Groups</h2>
+          <ul id="groups">
+          </ul>
         </div>
 
         <!-- Chat message entry box -->
@@ -77,11 +80,42 @@
         }
       }
 
+      function switchChatroom(chatroomName) {
+
+        console.log(username + " wants to switch to " + chatroomName)
+
+        $('#currentRoom').empty()
+        $('#messages').empty()
+
+        // Sets name of current room
+        $('#currentRoom').append(chatroomName)
+
+        // Joins the room
+        socket.emit('switch room', chatroomName)
+      }
+
       // Valid username/password
-      socket.on('valid login', function(chatroomName){
+      socket.on('valid login', function(info){
           
+          // Icon path and options
+          base_path = "../assets/"
+          options = 'height="50" width="50"'
+
+          // Looping through all the user's chatrooms
+          for (var i = 0; i < info['chatrooms'].length; i++) {
+
+            chatroomName = info['chatrooms'][i]
+            src = base_path + 'icon.png'
+
+            html = '<img src="' + src + '" ' + options + ' onclick="switchChatroom(this.id)" id="' + chatroomName + '" /><br />'
+            console.log("Setting html- " + html)
+
+            // Adding the possible groups to left area
+            $('#groups').append($(html).text(chatroomName))
+          }
+
+          // Removes login page
           $('#usernamePage').fadeOut('slow')
-          socket.emit('join room', chatroomName)
       })
 
       // On receiving a chat message
@@ -89,7 +123,7 @@
 
         $('#messages').append($('<li>').text(msg))
         window.scrollTo(0, document.body.scrollHeight)
-      });
+      })
 
       // Users logging in or out
       socket.on('user state update', function(usernames){
@@ -99,6 +133,8 @@
           $('#users').append($('<li id="' + usernames[i] + '">').text(usernames[i]))
         }
       })
+
+
 
       $(function () {
 

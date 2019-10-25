@@ -29,9 +29,19 @@ io.on('connection', function(socket){
 	var currentChatroom
 
 	// Joining a chatroom
-	socket.on('join room', function(roomName){
+	socket.on('switch room', function(roomName){
 
 		console.log("Room (" + roomName + ") joined by " + socketUsername)
+
+		// If user is in a room (initially a user is not)
+		if (currentChatroom != null) {
+
+			// Removing user from current room
+			chatRoomsToUsers[currentChatroom] = chatRoomsToUsers[currentChatroom].filter(function(value, index, arr){
+
+			    return value != socketUsername;
+			});
+		}
 
 		// Updating list of users in chatrooms
 		chatRoomsToUsers[roomName].push(socketUsername)
@@ -55,15 +65,18 @@ io.on('connection', function(socket){
 
 	socket.on('disconnect', function(){
 
+		if (currentChatroom == null) {
+			return
+		}
+
 		console.log(socketUsername + " has left the " + currentChatroom + " room")
+
 		chatRoomsToUsers[currentChatroom] = chatRoomsToUsers[currentChatroom].filter(function(value, index, arr){
 
 		    return value != socketUsername;
 		});
 
 		io.to(currentChatroom).emit('user state update', chatRoomsToUsers[currentChatroom])
-
-		DB.saveLastRoom(socketUsername, currentChatroom)
 	})
 
 	// On receiving a chat message
@@ -93,11 +106,21 @@ io.on('connection', function(socket){
 			// Valid login
 			else{
 
+				for (var i = 0; i < res.rows.length; i++) {
+
+					usersChatrooms.push(res.rows[i]['name'])
+				}
+
 				// Sets the name of the socket
 				socketUsername = info['username']
 
-				// Transitions user to chat page, passes back the chatroom name to join
-				socket.emit('valid login', res.rows[0]['name'])
+				console.log(socketUsername + " has joined the chatroom\n")
+
+				// Transitions user to chat page, passes back the user's chatrooms
+				socket.emit('valid login', 
+					{
+						'chatrooms' : usersChatrooms
+					})
 			}
 		})
 	})

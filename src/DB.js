@@ -25,7 +25,7 @@ module.exports = {
 		})
 	},
 
-	// Get all the chat history for a chatroom, sends it to a user
+	// Get all the chat history for a chatroom
 	getHistory : function(socketUsername, chatroomName, callback) {
 
 		query = "SELECT m.message, u.username FROM messages m JOIN users u ON m.userid = u.userid WHERE m.chatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '" + chatroomName + "')"
@@ -58,7 +58,7 @@ module.exports = {
 	// Returns last chatroom a user was in if it is a valid login
 	handleLogin : function(username, password, callback) {
 
-		var query = "SELECT c.name FROM chatrooms c WHERE c.chatroomid = (SELECT u.lastchatroomid FROM users u WHERE u.username = '" + username + "' AND u.password = '" + password + "')"
+		var query = "SELECT c.name FROM chatrooms c, users_chatrooms uc, users u WHERE c.chatroomid = uc.chatroomid AND uc.userid = u.userid AND u.username = '" + username + "' AND u.password = '" + password + "'"
 
 		// Save message in DB
 		client.query(query, function(err, res) {
@@ -66,7 +66,7 @@ module.exports = {
 	    		console.log(err.stack)
 	    		return
 	  		}
-
+	  		
 			return callback(res)
 		})
 	},
