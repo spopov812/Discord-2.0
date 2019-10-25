@@ -2,27 +2,16 @@
 <html>
   <head>
     <title>Socket.IO chat</title>
-    <!-- <link rel="stylesheet" type="text/css" href="../css/index.css"> -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/flatly/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="../css/index.css">
   </head>
 
   <body>
 
     
 
-    <ul class="pages">
-
-      <!-- Chat page -- >
-      <li class="chat page">
-
-        <!-- Top banner -->
-        <div id="banner">
-          <div id="banner-content">
-            Welcome to Discord 2.0!
-          </div>
-          <h2 id="currentRoom"></h2>
-        </div>
+    <div class="wrapper">
 
         <!-- Area for chat -->
         <div class="chatArea">
@@ -30,24 +19,25 @@
         </div>
 
         <!-- Active users -->
-        <div class="active">
-          <h2>Active Users</h2>
-          <ul class="users" id="users"></ul>
-        </div>
+        <nav id="sidebar" class="navbar-light bg-light sidebar-right">
+          <center><h2>Active Users</h2></center>
+          <ulid="users"></ul>
+        </nav>
 
         <!-- Groups -->
-        <div class="groupArea">
-          <h2>Groups</h2>
+        <nav id="groupArea" class="navbar-light bg-light sidebar-left">
+          <center><h2>Groups</h2></center>
           <ul id="groups">
           </ul>
-        </div>
+        </nav>
 
         <!-- Chat message entry box -->
-        <form action="">
-          <input class="inputMessage" id="m" autocomplete="off" placeholder="Type here..." />
-        </form>
-      </li>
-      <!-- Handling user login -->
+        
+          <form action="">
+            <input class="inputBar" id="m" autocomplete="off" placeholder="Type here..." />
+          </form>
+        
+      <!-- Handling user login
         <li class="login page" id="usernamePage">
           <div class="nameForm">
             <h3 class="title">What's your nickname?</h3>
@@ -55,8 +45,8 @@
             <br/>
             <input class="usernameInput" id="passwordInput" type="password" onkeydown="submitLogin()" placeholder="Password" />
           </div>
-        </li>
-    </ul>
+        </li> -->
+    </div>
     
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
