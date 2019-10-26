@@ -99,11 +99,6 @@
         socket.emit('switch room', chatroomName)
       }
 
-      function handleCommand(msg) {
-
-        console.log("Handling command- " + msg)
-      }
-
       // Valid username/password
       socket.on('valid login', function(info){
           
@@ -154,11 +149,6 @@
           msg = $('#m').val()
 
           $('#m').val('')
-
-          if (msg.charAt(0) == '$'){
-            handleCommand(msg.substring(1))
-            return false
-          }
 
           socket.emit('chat message', 
 
