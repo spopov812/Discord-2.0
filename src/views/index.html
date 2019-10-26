@@ -1,17 +1,20 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html>
   <head>
     <title>Socket.IO chat</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/flatly/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="../css/index.css">
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   </head>
 
   <body>
 
-    
-
     <div class="wrapper">
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        </nav>
 
         <!-- Area for chat -->
         <div class="chatArea">
@@ -20,6 +23,8 @@
 
         <!-- Active users -->
         <nav id="sidebar" class="navbar-light bg-light sidebar-right">
+          <center><h1 id="currentRoom">Unknown</h1>
+            <hr/>
           <center><h2>Active Users</h2></center>
           <ulid="users"></ul>
         </nav>
@@ -32,11 +37,31 @@
         </nav>
 
         <!-- Chat message entry box -->
+        <form action="">
+          <input class="inputBar" id="m" autocomplete="off" placeholder="Type here..." />
+        </form>
         
-          <form action="">
-            <input class="inputBar" id="m" autocomplete="off" placeholder="Type here..." />
-          </form>
-        
+        <!-- User login/registration -->
+        <div id="myModal" class="modal">
+          <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Modal Header</h4>
+              </div>
+              <div class="modal-body">
+                <p>Some text in the modal.</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       <!-- Handling user login
         <li class="login page" id="usernamePage">
           <div class="nameForm">
@@ -47,9 +72,6 @@
           </div>
         </li> -->
     </div>
-    
-    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
 
       var username
@@ -132,6 +154,7 @@
 
         // On submitting a chat message
         $('form').submit(function(){
+
           socket.emit('chat message', 
             {
 
@@ -142,7 +165,7 @@
           $('#m').val('')
           return false
         });
-      });          
+      });      
     </script>
   </body>
 </html>

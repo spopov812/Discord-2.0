@@ -3,6 +3,7 @@
     max-width: 260px;
     min-height: 100vh;
     position : absolute;
+    top: 30px;
     left: 0;
 }
 
@@ -29,4 +30,8 @@
   margin-left:-250px;
   bottom:0px;
   left:50%;
+}
+
+.navbar {
+  width: 100%;
 }
