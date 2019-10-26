@@ -38,8 +38,11 @@
         <!-- Groups -->
         <div class="groupArea">
           <h2>Groups</h2>
-          <ul id="groups">
-          </ul>
+          <center>
+            <button>Make New Group</button>
+            <ul id="groups">
+            </ul>
+          </center>
         </div>
 
         <!-- Chat message entry box -->
@@ -96,6 +99,11 @@
         socket.emit('switch room', chatroomName)
       }
 
+      function handleCommand(msg) {
+
+        console.log("Handling command- " + msg)
+      }
+
       // Valid username/password
       socket.on('valid login', function(info){
           
@@ -142,14 +150,25 @@
 
         // On submitting a chat message
         $('form').submit(function(){
+
+          msg = $('#m').val()
+
+          $('#m').val('')
+
+          if (msg.charAt(0) == '$'){
+            handleCommand(msg.substring(1))
+            return false
+          }
+
           socket.emit('chat message', 
+
             {
 
               username : username,
-              message: $('#m').val()
+              message: msg
 
             });
-          $('#m').val('')
+
           return false
         });
       });          
