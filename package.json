@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "my first socket.io app",
   "dependencies": {
+    "bootstrap": "^3.4.1",
     "express": "^4.15.2",
     "mysql": "^2.17.1",
     "pg": "^7.12.1",

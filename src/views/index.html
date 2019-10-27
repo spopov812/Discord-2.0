@@ -2,11 +2,20 @@
 <html>
   <head>
     <title>Socket.IO chat</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="../css/index.css">
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/flatly/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="../css/index.css">
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <script type="text/javascript">
+      $(window).on('load', function(){
+         $('#myModal').modal('show');
+      });
+    </script>
   </head>
 
   <body>
@@ -42,20 +51,25 @@
         </form>
         
         <!-- User login/registration -->
-        <div id="myModal" class="modal">
+        <div id="myModal" class="modal fade">
           <div class="modal-dialog">
 
             <!-- Modal content-->
             <div class="modal-content">
               <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Modal Header</h4>
+                <h4 class="modal-title">Welcome</h4>
               </div>
               <div class="modal-body">
-                <p>Some text in the modal.</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <p>Login</p>
+
+                <input class="usernameInput" id="usernameInput" type="text" maxlength="14" placeholder="Username"/>
+                <br />
+                <input class="usernameInput" id="passwordInput" type="password" onkeydown="submitLogin()" placeholder="Password" />
+
+                <hr />
+
+                <p>Create Account</p>
+
               </div>
             </div>
 
@@ -111,6 +125,9 @@
       // Valid username/password
       socket.on('valid login', function(info){
           
+          // Removes login page
+          $('#myModal').modal('hide');
+
           // Icon path and options
           base_path = "../assets/"
           options = 'height="50" width="50"'
@@ -127,14 +144,12 @@
             // Adding the possible groups to left area
             $('#groups').append($(html).text(chatroomName))
           }
-
-          // Removes login page
-          $('#usernamePage').fadeOut('slow')
       })
 
       // On receiving a chat message
       socket.on('chat message', function(msg){
 
+        console.log("Adding message- " + msg)
         $('#messages').append($('<li>').text(msg))
         window.scrollTo(0, document.body.scrollHeight)
       })
@@ -153,7 +168,7 @@
       $(function () {
 
         // On submitting a chat message
-        $('form').submit(function(){
+        $('#form').submit(function(){
 
           socket.emit('chat message', 
             {
