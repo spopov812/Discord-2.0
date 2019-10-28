@@ -3,63 +3,101 @@
   <head>
     <title>Socket.IO chat</title>
     <link rel="stylesheet" type="text/css" href="../css/index.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/flatly/bootstrap.min.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
   </head>
 
   <body>
 
-    
+<div class="container-fluid d-flex flex-column">
 
-    <ul class="pages">
+    <!-- Top banner -->
+    <div>
+    <nav class="navbar fixed-top bg-secondary d-block">
+      <div class="navbar-text font-weight-bold text-white float-left" id="banner-content">
+          Discord 2.0 <i class="fa fa-comments-o"></i>
+      </div>
+    </nav>
+  </div>
 
-      <!-- Chat page -- >
-      <li class="chat page">
-
-        <!-- Top banner -->
-        <div id="banner">
-          <div id="banner-content">
-            Welcome to Discord 2.0!
-          </div>
-          <h2 id="currentRoom"></h2>
-        </div>
-
-        <!-- Area for chat -->
-        <div class="chatArea">
-          <ul id="messages"></ul>
-        </div>
-
-        <!-- Active users -->
-        <div class="active">
-          <h2>Active Users</h2>
-          <ul class="users" id="users"></ul>
-        </div>
+        <div class="chat page row vh-100 d-none">
 
         <!-- Groups -->
-        <div class="groupArea">
-          <h2>Groups</h2>
+        <div class="groupArea col-sm-3 bg-secondary">
+          <h3 class="bg-dark text-light p-3 shadow rounded"> Groups <button class="btn btn-secondary float-right">
+              <i class="fa fa-plus"></i>
+            </button></h3>
+            <div class="card">
           <center>
-            <button>Make New Group</button>
             <ul id="groups">
             </ul>
           </center>
         </div>
+        </div>
 
-        <!-- Chat message entry box -->
-        <form action="">
-          <input class="inputMessage" id="m" autocomplete="off" placeholder="Type here..." />
-        </form>
-      </li>
-      <!-- Handling user login -->
-        <li class="login page" id="usernamePage">
-          <div class="nameForm">
-            <h3 class="title">What's your nickname?</h3>
-            <input class="usernameInput" id="usernameInput" type="text" maxlength="14" placeholder="Username"/>
-            <br/>
-            <input class="usernameInput" id="passwordInput" type="password" onkeydown="submitLogin()" placeholder="Password" />
+        <!-- Area for chat -->
+        <div class="col-sm-7">
+          <div class="chatArea rounded">
+            <div class="bg-light shadow">
+              <h1 class="pl-3 py-2 rounded" id="currentRoom"></h1>
+            </div>
+            <ul id="messages"></ul>
           </div>
-        </li>
-    </ul>
+        <!-- Chat message entry box -->
+          <form action="">
+            <input class="inputMessage form-control align-bottom" id="m" autocomplete="off" placeholder="Type here..." />
+          </form>
+        </div>
+        <!-- Active users -->
+        <div class="active col-sm-2 bg-secondary">
+          <h3 class="text-light bg-dark shadow rounded p-3">Active Users <i class="fa fa-circle color text-success pl-sm-1 shadow"></i></h3>
+          <div class="overflow-auto">
+            <ul class="users" id="users"></ul>
+          </div>
+        </div>
+        </div>
+
+      
+      
+      <!-- Handling user login -->
+    <div class="row bg-dark vh-100 vw-100 position-fixed" id="usernamePage">
+      <div class="col-sm-3"></div>
+      <div class="login page col-sm-6 text-center text-light align-self-center">
+        <div class="nameForm">
+          <h3 class="title">Welcome to Discord 2.0!</h3>
+          <input class="usernameInput" id="usernameInput" type="text" maxlength="14" placeholder="Username"/>
+          <br/>
+          <input class="usernameInput" id="passwordInput" type="password" onkeydown="submitLogin()" placeholder="Password" />
+          <br/>
+          <button class="btn btn-secondary my-4" onclick="submitLoginButton()">Submit</button>
+          <p>
+            or create an account <button class="link font-italic text-light bg-transparent border-0 m-0 p-0" id="registerLink" onmouseover="textHover()" onmouseout="stopHover()" onclick="toRegister()">here.</button>
+          </p>
+        </div>
+      </div>
+      <div class="col-sm-3"></div>
+    </div>
+
+      <!-- Handling user registration -->
+      <div class="row bg-dark vh-100 vw-100 position-fixed d-none" id="registerPage">
+        <div class="col-sm-3"></div>
+        <div class="register page col-sm-6 text-center text-light align-self-center">
+          <div class="nameForm">
+            <h3 class="title">Create an account</h3>
+            <input class="usernameInput" id="registerUsername" type="text" maxlength="14" placeholder="Username"/>
+            <br/>
+            <input class="usernameInput" id="registerPassword" type="password" onkeydown="submitRegister()" placeholder="Password" />
+            <br/>
+            <button class="btn btn-secondary my-4" onclick="submitRegister()">Submit</button>
+            <p>
+            Already have an account? <button class="link font-italic text-light bg-transparent border-0 m-0 p-0" id="loginLink" onmouseover="textHover()" onmouseout="stopHover()" onclick="toLogin()">Log in!</button>
+          </p>
+          </div>
+        </div>
+        <div class="col-sm-3"></div>
+    </div>
+    
+  </div>
     
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
@@ -68,9 +106,8 @@
       var username
       var socket = io();
 
-      // Creating a name
+      // Logging in by key press
       function submitLogin() {
-        
         if(event.key === 'Enter') {
             
             username = $('#usernameInput').val()
@@ -83,6 +120,48 @@
               }
             )   
         }
+      }
+
+      // Logging in by button press
+      function submitLoginButton() {
+            username = $('#usernameInput').val()
+
+            // Lets server know this users username
+            socket.emit('user connect', 
+              {
+                username : $('#usernameInput').val(),
+                password : $('#passwordInput').val()
+              }
+            )   
+      }
+
+      // Registration page to login page
+      function toLogin() {
+        $('#registerPage').fadeOut('slow')
+        $('#usernamePage').show()
+        $('#registerPage').addClass('d-none')
+      }
+
+      // Creating account
+      function toRegister() {
+        $('#usernamePage').fadeOut('slow')
+        $('#registerPage').removeClass('d-none')
+      }
+
+      function submitRegister(){
+
+      }
+
+      // Change text color when hovering over
+      function textHover() {
+        $('.link').removeClass('text-light')
+        $('.link').addClass('text-secondary')
+      }
+
+      // Return text to original color
+      function stopHover() {
+        $('.link').removeClass('text-secondary')
+        $('.link').addClass('text-light')
       }
 
       function switchChatroom(chatroomName) {
@@ -121,6 +200,8 @@
 
           // Removes login page
           $('#usernamePage').fadeOut('slow')
+          $('.chat.page').removeClass('d-none')
+
       })
 
       // On receiving a chat message
