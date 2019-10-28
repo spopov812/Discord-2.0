@@ -3,7 +3,6 @@
     max-width: 260px;
     min-height: 100vh;
     position : absolute;
-    top: 30px;
     left: 0;
 }
 
@@ -34,4 +33,18 @@
 
 .navbar {
   width: 100%;
+}
+
+.chatArea {
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+}
+
+.chatArea p{
+  display: inline;
+}
+
+ul {
+  list-style-type: none;
 }

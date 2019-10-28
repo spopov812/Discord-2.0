@@ -10,20 +10,11 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/flatly/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="../css/index.css">
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-
-    <script type="text/javascript">
-      $(window).on('load', function(){
-         $('#myModal').modal('show');
-      });
-    </script>
   </head>
 
-  <body>
+  <body onload='$("#loginModal").modal("show")'>
 
     <div class="wrapper">
-
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        </nav>
 
         <!-- Area for chat -->
         <div class="chatArea">
@@ -32,26 +23,32 @@
 
         <!-- Active users -->
         <nav id="sidebar" class="navbar-light bg-light sidebar-right">
-          <center><h1 id="currentRoom">Unknown</h1>
+          <center>
+            <h1 id="currentRoom">Please select a room</h1>
             <hr/>
-          <center><h2>Active Users</h2></center>
-          <ulid="users"></ul>
+            <h2>Active Users</h2>
+            <ul id="users"></ul>
+          </center> 
         </nav>
 
         <!-- Groups -->
         <nav id="groupArea" class="navbar-light bg-light sidebar-left">
-          <center><h2>Groups</h2></center>
+          <center>
+            <h2>Groups</h2>
+            <button type="button" class="btn btn-outline-info" onclick="$('#createModal').modal('show')">Create Group</button>
+            <hr />
+          </center>
           <ul id="groups">
           </ul>
         </nav>
 
         <!-- Chat message entry box -->
-        <form action="">
-          <input class="inputBar" id="m" autocomplete="off" placeholder="Type here..." />
-        </form>
+        
+        <input class="inputBar" id="m" autocomplete="off" type="text" onkeydown="sendMessage(this)" placeholder="Type here..." />
+        
         
         <!-- User login/registration -->
-        <div id="myModal" class="modal fade">
+        <div id="loginModal" class="modal fade" data-backdrop="static">
           <div class="modal-dialog">
 
             <!-- Modal content-->
@@ -64,11 +61,23 @@
 
                 <input class="usernameInput" id="usernameInput" type="text" maxlength="14" placeholder="Username"/>
                 <br />
-                <input class="usernameInput" id="passwordInput" type="password" onkeydown="submitLogin()" placeholder="Password" />
+                <br />
+                <input class="usernameInput" id="passwordInput" type="password" placeholder="Password" />
+                <br />
+                <button onclick="submitLogin()" class="btn btn-outline-success" style="position:relative; top : 5px;">Submit</button>
 
                 <hr />
 
                 <p>Create Account</p>
+                <input class="usernameInput" id="usernameCreate" type="text" maxlength="14" placeholder="Username"/>
+                <p id="userExists" style="color : red; display : none;">Username taken</p>
+                <br />
+                <br />
+                <input class="usernameInput" id="passwordCreate" type="password" placeholder="Password" />
+                <input class="usernameInput" id="passwordCreateRe" type="password" placeholder="Re-type password" />
+                <p id="passMatch" style="color : red; display : none;">Passwords do not match</p>
+                <br />
+                <button onclick="createAccount()" class="btn btn-outline-success" style="position:relative; top : 5px;">Create</button>
 
               </div>
             </div>
@@ -76,15 +85,28 @@
           </div>
         </div>
 
-      <!-- Handling user login
-        <li class="login page" id="usernamePage">
-          <div class="nameForm">
-            <h3 class="title">What's your nickname?</h3>
-            <input class="usernameInput" id="usernameInput" type="text" maxlength="14" placeholder="Username"/>
-            <br/>
-            <input class="usernameInput" id="passwordInput" type="password" onkeydown="submitLogin()" placeholder="Password" />
+        <!-- Group creation -->
+        <div id="createModal" class="modal fade">
+          <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Create a Group</h4>
+              </div>
+              <div class="modal-body">
+                <p>Name</p>
+
+                <input class="usernameInput" id="newGroupName" type="text" maxlength="14" placeholder="Group name"/>
+                <br />
+                <input type="file" id="newGroupIcon">
+                <br />
+                <button onclick="createGroup()" class="btn btn-outline-success" style="position:relative; top : 5px;">Create</button>
+              </div>
+            </div>
+
           </div>
-        </li> -->
+        </div>
     </div>
     <script>
 
@@ -94,24 +116,60 @@
       // Creating a name
       function submitLogin() {
         
-        if(event.key === 'Enter') {
-            
-            username = $('#usernameInput').val()
+        username = $('#usernameInput').val()
 
-            // Lets server know this users username
-            socket.emit('user connect', 
-              {
-                username : $('#usernameInput').val(),
-                password : $('#passwordInput').val()
-              }
-            )   
-        }
+        // Lets server know this users username
+        socket.emit('user connect', 
+          {
+            'username' : $('#usernameInput').val(),
+            'password' : $('#passwordInput').val()
+          }
+        )   
       }
 
+      // Handles account creation
+      function createAccount() {
+
+        // Getting fields
+        usernameLocal = $('#usernameCreate').val()
+        password = $('#passwordCreate').val()
+        passwordRe = $('#passwordCreateRe').val()
+
+        console.log(`Pass: ${password}, PassRe: ${passwordRe}`)
+
+        // If pasword retype matches
+        if (password != passwordRe){
+
+          // Show error
+          $('#passMatch').show()
+          $('#userExists').hide()
+          return false
+        }
+
+        else{
+
+          $('#passMatch').hide()
+        }
+
+        socket.emit('create account', 
+        {
+          'username' : usernameLocal,
+          'password' : password
+        })
+      }
+
+      function createGroup() {
+
+        file = document.getElementById('newGroupIcon').files[0]
+        console.log(file)
+        //fetch('/upload/image', {method: "POST", body: {'image' : file}});
+        socket.emit('create group', $('#newGroupName').val())
+      }
+
+      // Switching between different chatrooms
       function switchChatroom(chatroomName) {
 
-        console.log(username + " wants to switch to " + chatroomName)
-
+        // Clears the name of the current room and its messages
         $('#currentRoom').empty()
         $('#messages').empty()
 
@@ -122,65 +180,129 @@
         socket.emit('switch room', chatroomName)
       }
 
+      // On submitting a chat message
+      function sendMessage(ele) {
+
+        // Enter hit for message send
+        if(event.key === 'Enter') {
+
+          console.log("Sending message from " + username)
+
+          // Sending the message
+          socket.emit('chat message', 
+            {
+
+              'username' : username,
+              'message': $('#m').val()
+
+            });
+
+          // Clearing message from input bar
+          $('#m').val('')
+          return false
+        }     
+      }
+
+      socket.on('create account response', function(res){
+
+        if (res == "username exists") {
+
+          $('#userExists').show()
+        }
+
+        if (res == "success") {
+
+          console.log('Successfully created a new user account')
+
+          $('#userExists').hide()
+          $('#passMatch').hide()
+
+          username = $('#usernameCreate').val()
+
+          console.log("Sending user connect message with values " + $('#usernameCreate').val() + " and " + $('#passwordCreate').val())
+
+          socket.emit('user connect', 
+          {
+            'username' : $('#usernameCreate').val(),
+            'password' : $('#passwordCreate').val()
+          }
+        )   
+        }
+      })
+
+      // Response for group creation
+      socket.on('create group response', function(res){
+
+        // TODO
+        if (res != 'success'){
+
+          console.log("Did not successfully createa a new group")
+          return
+        }
+
+        // Hiding modal and handling page refresh
+        console.log("Successfully created a new group")
+        $('#createModal').modal('hide');
+
+
+      })
+
       // Valid username/password
       socket.on('valid login', function(info){
           
-          // Removes login page
-          $('#myModal').modal('hide');
+        $('#groups').empty()
 
-          // Icon path and options
-          base_path = "../assets/"
-          options = 'height="50" width="50"'
+        // Removes login page
+        $('#loginModal').modal('hide')
 
-          // Looping through all the user's chatrooms
-          for (var i = 0; i < info['chatrooms'].length; i++) {
+        // Icon path and options
+        base_path = "../assets/"
+        options = 'height="50" width="50" onclick="switchChatroom(this.id)"'
 
-            chatroomName = info['chatrooms'][i]
-            src = base_path + chatroomName.replace(" ", "_") + '_icon.png'
+        // Looping through all the user's chatrooms
+        for (var i = 0; i < info['chatrooms'].length; i++) {
 
-            html = '<img src="' + src + '" ' + options + ' onclick="switchChatroom(this.id)" id="' + chatroomName + '" /><br />'
-            console.log("Setting html- " + html)
+          chatroomName = info['chatrooms'][i]
+          src = base_path + chatroomName.replace(" ", "_") + '_icon.png'
 
-            // Adding the possible groups to left area
-            $('#groups').append($(html).text(chatroomName))
-          }
+          html = `<img src="${src}" ${options} id="${chatroomName}" /><h4>${chatroomName}</h4><hr />`
+          console.log("Setting html- " + html)
+
+          // Adding the possible groups to left area
+          $('#groups').append(html)
+        }
       })
 
       // On receiving a chat message
-      socket.on('chat message', function(msg){
+      socket.on('chat message', function(info){
 
-        console.log("Adding message- " + msg)
-        $('#messages').append($('<li>').text(msg))
+        color = "style="
+
+        if (info['username'] == username) {
+          color += '"color : green;"'
+        }
+
+        else{
+          color += '"color : black;"'
+        }
+
+        html = `<li><p ${color}>${info['username']}- </p><p>${info['message']}</p></li><hr />`
+
+        $('#messages').append(html)
         window.scrollTo(0, document.body.scrollHeight)
       })
 
       // Users logging in or out
       socket.on('user state update', function(usernames){
+
+        // Clearing active users
         $('#users').empty()
 
+        // Adding the users
         for (var i = 0; i < usernames.length; i++) {
-          $('#users').append($('<li id="' + usernames[i] + '">').text(usernames[i]))
+          $('#users').append($('<h4 id="' + usernames[i] + '">').text(usernames[i]))
         }
       })
-
-
-
-      $(function () {
-
-        // On submitting a chat message
-        $('#form').submit(function(){
-
-          socket.emit('chat message', 
-            {
-
-              username : username,
-              message: $('#m').val()
-
-            });
-          $('#m').val('')
-          return false
-        });
-      });      
     </script>
   </body>
 </html>

@@ -25,6 +25,40 @@ module.exports = {
 		})
 	},
 
+	// Checks if a username is already taken
+	userExists : function (username, callback) {
+
+		query = `SELECT u.username FROM users u WHERE u.username = '${username}'`
+
+		client.query(query, (err, res) => {
+
+			if (err) {
+				console.log(err.stack)
+				return
+			} else {
+
+				// If user exists, then the rows of the query will not be empty
+				return callback(res)
+			}
+		})
+	},
+
+	createUser : function(username, password, callback) {
+
+		query = `INSERT INTO users (username, password) VALUES ('${username}', '${password}')`
+
+		client.query(query, (err, res) => {
+
+			if (err) {
+				console.log(err.stack)
+				return
+			} else {
+
+				return callback(res)
+			}
+		})
+	},
+
 	// Get all the chat history for a chatroom
 	getHistory : function(socketUsername, chatroomName, callback) {
 
@@ -71,6 +105,21 @@ module.exports = {
 		})
 	},
 
+	addToRoom : function(username, roomName, callback){
+
+
+		var query = `INSERT INTO users_chatrooms (userid, chatroomid) VALUES ((SELECT u.userid FROM users u WHERE u.username = '${username}'), (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${roomName}'))`
+		
+		client.query(query, function(err, res) {
+			if (err) {
+	    		console.log(err.stack)
+	    		return
+	  		}
+	  		
+			return callback(res)
+		})
+	},
+
 	// Will save the last chat room a user was in when they log out
 	saveLastRoom : function(username, chatroomName) {
 
@@ -81,6 +130,22 @@ module.exports = {
 
 			if (err) {
 	    		console.log(err.stack)
+	  		}
+		})
+	},
+
+	createGroup : function(groupName, callback) {
+
+		var query = `INSERT INTO chatrooms (name) VALUES ('${groupName}')`
+
+		client.query(query, (err, res) => {
+
+			if (err) {
+	    		console.log(err.stack)
+	    		return
+	  		}
+	  		else {
+	  			return callback(true)
 	  		}
 		})
 	}

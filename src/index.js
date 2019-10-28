@@ -53,7 +53,12 @@ io.on('connection', function(socket){
 		// Populates screen with user's chat history
 		DB.getHistory(socketUsername, currentChatroom, function(res){
 			for (var i = 0; i < res.rows.length; i++){
-				socket.emit('chat message', res.rows[i]['username'] + "- " + res.rows[i]['message'])
+				socket.emit('chat message', 
+				{
+
+					'username' : res.rows[i]['username'],
+					'message' : res.rows[i]['message']
+				})
 			}
 		})
 
@@ -88,7 +93,10 @@ io.on('connection', function(socket){
 		console.log("Sending message- " + info['message'] + " to chatroom- " + currentChatroom)
 
 		// Sends message back to html to display it
-		io.to(currentChatroom).emit('chat message', info['username'] + "- " + info['message']);
+		io.to(currentChatroom).emit('chat message', {
+			'username' : info['username'],
+			'message' : info['message']
+		});
 	})
 
 	// Initializing the user's info on login
@@ -96,6 +104,8 @@ io.on('connection', function(socket){
 		
 		// Querying DB if login is valid
 		DB.handleLogin(info['username'], info['password'], function(res){
+
+			console.log("Response from user connect is ", res.rows)
 
 			// Invalid login
 			if (res.rows === undefined || res.rows.length == 0) {
@@ -124,6 +134,59 @@ io.on('connection', function(socket){
 			}
 		})
 	})
+
+	// Channel for account creation
+	socket.on('create account', function(info){
+
+		// Checks if the username is already taken
+		DB.userExists(info['username'], function(res){
+
+
+			// Rows should be empty if the username is not taken
+			if (res.rows.length != 0) {
+
+				console.log("Username already exists")
+				socket.emit('create account response', "username exists")
+				return
+			}
+
+			console.log("Creating a new user")
+
+			// Creates actual user
+			DB.createUser(info['username'], info['password'], function(res){
+
+				DB.addToRoom(info['username'], 'General', function(res) {
+
+					socket.emit('create account response', 'success')
+				})
+			})
+		})
+	})
+
+	socket.on('create group', function(groupName){
+
+		DB.createGroup(groupName, function(res){
+
+			console.log("Created new group with name: " + groupName)
+
+			DB.addToRoom(socketUsername, groupName, function(res) {
+
+				console.log("Adding " + socketUsername + " to new " + groupName)
+
+				usersChatrooms.push(groupName)
+
+				chatRoomsToUsers[groupName] = []
+
+				socket.emit('valid login', 
+				{
+						'chatrooms' : usersChatrooms
+				})
+
+				socket.emit('create group response', 'success')
+
+			})
+		})
+	})
 });
 
 // HTTP server listening
@@ -135,5 +198,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Initial page
 app.get('/', function(req, res){
+console.log("Listening :)")
   res.sendFile(__dirname + '/views/index.html');
 });
