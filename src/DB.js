@@ -180,5 +180,21 @@ module.exports = {
 	  			return callback(true)
 	  		}
 		})
+	},
+
+	kick : function(username, groupName, callback) {
+
+		var query = `DELETE FROM users_chatrooms WHERE userid = (SELECT u.userid FROM users u WHERE u.username = '${username}') AND chatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${groupName}')`
+
+		client.query(query, (err, res) => {
+
+			if (err) {
+	    		console.log(err.stack)
+	    		return
+	  		}
+	  		else {
+	  			return callback(true)
+	  		}
+		})
 	}
 }

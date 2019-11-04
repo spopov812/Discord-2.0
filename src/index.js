@@ -228,6 +228,37 @@ io.on('connection', function(socket){
 		})
 	})
 
+	socket.on('kick', function(info){
+
+		// Checking if is admin
+		DB.isAdmin(info['roomName'], info['username'], function(res){
+
+			// If the user is not an admin, do not let them add people
+			if (!res.rows[0].is_admin) {
+
+				// Notify user
+				socket.emit('chat message', 
+				{
+
+					'username' : 'AUTO',
+					'message' : 'You are not authorized to kick users'
+				})
+
+				return
+			}
+
+			DB.kick(info['userToKick'], info['roomName'], function(res){
+
+				io.to(currentChatroom).emit('chat message', {
+					'username' : 'AUTO',
+					'message' : `${info['userToKick']} has been kicked by ${info['username']}`
+				});
+
+				io.to(currentChatroom).emit('refresh', {'username' : info['userToKick']})
+			})
+		})
+	})
+
 	socket.on('create group', function(info){
 
 		var groupName = info['groupname']

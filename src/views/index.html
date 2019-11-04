@@ -259,8 +259,12 @@
         else if (splitMsg[0] == "kick") {
 
           var userToKick = splitMsg[1]
-          res['message'] = `Kicking ${userToKick}...`
-          addMessage(res)
+
+          socket.emit('kick', {
+            'username' : username,
+            'userToKick' : userToKick,
+            'roomName' : currentRoom
+          })
         }
 
         else if (splitMsg[0] == "add") {
@@ -393,6 +397,16 @@
       socket.on('chat message', function(info){
 
         addMessage(info)
+      })
+
+      // On a user being kicked
+      socket.on('refresh', function(info){
+
+        // If this user needs to refresh the page
+        if (username == info['username']) {
+
+          location.reload()
+        }
       })
 
       // Users logging in or out
