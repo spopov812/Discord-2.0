@@ -43,10 +43,12 @@ module.exports = {
 		})
 	},
 
+	// Creates a user in the database
 	createUser : function(username, password, callback) {
 
 		query = `INSERT INTO users (username, password) VALUES ('${username}', '${password}')`
 
+		// Execute query
 		client.query(query, (err, res) => {
 
 			if (err) {
@@ -134,10 +136,12 @@ module.exports = {
 		})
 	},
 
+	// Will create a new group with the given name
 	createGroup : function(groupName, callback) {
 
 		var query = `INSERT INTO chatrooms (name) VALUES ('${groupName}')`
 
+		// Execute query
 		client.query(query, (err, res) => {
 
 			if (err) {
@@ -150,10 +154,12 @@ module.exports = {
 		})
 	},
 
+	// Checks if a user is the admin in a group
 	isAdmin : function(groupName, username, callback) {
 
 		var query = `SELECT uc.is_admin FROM users_chatrooms uc WHERE uc.userid = (SELECT u.userid FROM users u WHERE u.username = '${username}') AND uc.chatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${groupName}')`
 
+		// Execute query
 		client.query(query, (err, res) => {
 
 			if (err) {
@@ -166,10 +172,12 @@ module.exports = {
 		})
 	},
 
+	// Updating user's admin privileges in the group
 	setAdmin : function(username, groupName, callback) {
 
 		var query = `UPDATE users_chatrooms SET is_admin = 'TRUE' WHERE userid = (SELECT u.userid FROM users u WHERE u.username = '${username}') AND chatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${groupName}')`
 
+		// Execute query
 		client.query(query, (err, res) => {
 
 			if (err) {
@@ -182,10 +190,12 @@ module.exports = {
 		})
 	},
 
+	// Removing a user from a group
 	kick : function(username, groupName, callback) {
 
 		var query = `DELETE FROM users_chatrooms WHERE userid = (SELECT u.userid FROM users u WHERE u.username = '${username}') AND chatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${groupName}')`
 
+		// Execute query
 		client.query(query, (err, res) => {
 
 			if (err) {

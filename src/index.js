@@ -70,19 +70,23 @@ io.on('connection', function(socket){
 		console.log(chatRoomsToUsers)
 	})
 
+	// Socket listening for when a user leaves the site
 	socket.on('disconnect', function(){
 
+		// If the user was not a part of a chatroom
 		if (currentChatroom == null) {
 			return
 		}
 
 		console.log(socketUsername + " has left the " + currentChatroom + " room")
 
+		// Updating the list of rooms to users
 		chatRoomsToUsers[currentChatroom] = chatRoomsToUsers[currentChatroom].filter(function(value, index, arr){
 
 		    return value != socketUsername;
 		});
 
+		// Updates the panel of active users
 		io.to(currentChatroom).emit('user state update', chatRoomsToUsers[currentChatroom])
 	})
 
@@ -199,6 +203,7 @@ io.on('connection', function(socket){
 		})	
 	})
 
+	// Socket listening for which admin to set in the group
 	socket.on('set admin', function(info){
 
 		// Checking if is admin
@@ -218,8 +223,10 @@ io.on('connection', function(socket){
 				return
 			}
 
+			// Updating the admin privilege in the database
 			DB.setAdmin(info['userToAdmin'], info['roomName'], function(res){
 
+				// Sending message to the chatroom of the update
 				io.to(currentChatroom).emit('chat message', {
 					'username' : 'AUTO',
 					'message' : `${info['userToAdmin']} has been set as an admin by ${info['username']}`
@@ -228,6 +235,7 @@ io.on('connection', function(socket){
 		})
 	})
 
+	// Socket listening for the user to be kicked
 	socket.on('kick', function(info){
 
 		// Checking if is admin
@@ -247,18 +255,22 @@ io.on('connection', function(socket){
 				return
 			}
 
+			// Updating the kick in the database
 			DB.kick(info['userToKick'], info['roomName'], function(res){
 
+				// Sends message to room about the update
 				io.to(currentChatroom).emit('chat message', {
 					'username' : 'AUTO',
 					'message' : `${info['userToKick']} has been kicked by ${info['username']}`
 				});
 
+				// Sends message to all users of the username that was kicked. That users page will refresh
 				io.to(currentChatroom).emit('refresh', {'username' : info['userToKick']})
 			})
 		})
 	})
 
+	// Socket listening for when a group is to be created
 	socket.on('create group', function(info){
 
 		var groupName = info['groupname']
@@ -273,25 +285,28 @@ io.on('connection', function(socket){
 	       console.log("image converted and saved to dir")
 	  	})
 
+		// Save the group in the database
 		DB.createGroup(groupName, function(res){
 
 			console.log("Created new group with name: " + groupName)
 
+			// Adding the user that created the group
 			DB.addToRoom(socketUsername, groupName, true, function(res) {
 
 				console.log("Adding " + socketUsername + " to new " + groupName)
 
+				// Updating list of groups to users
 				usersChatrooms.push(groupName)
-
 				chatRoomsToUsers[groupName] = []
 
+				// Updating html page for the update
 				socket.emit('valid login', 
 				{
 						'chatrooms' : usersChatrooms
 				})
 
+				// Successfully created the group
 				socket.emit('create group response', 'success')
-
 			})
 		})
 	})
