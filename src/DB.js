@@ -105,10 +105,10 @@ module.exports = {
 		})
 	},
 
-	addToRoom : function(username, roomName, callback){
+	addToRoom : function(username, roomName, isAdmin, callback){
 
 
-		var query = `INSERT INTO users_chatrooms (userid, chatroomid) VALUES ((SELECT u.userid FROM users u WHERE u.username = '${username}'), (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${roomName}'))`
+		var query = `INSERT INTO users_chatrooms (userid, chatroomid, is_admin) VALUES ((SELECT u.userid FROM users u WHERE u.username = '${username}'), (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${roomName}'), '${isAdmin}')`
 		
 		client.query(query, function(err, res) {
 			if (err) {
@@ -137,6 +137,38 @@ module.exports = {
 	createGroup : function(groupName, callback) {
 
 		var query = `INSERT INTO chatrooms (name) VALUES ('${groupName}')`
+
+		client.query(query, (err, res) => {
+
+			if (err) {
+	    		console.log(err.stack)
+	    		return
+	  		}
+	  		else {
+	  			return callback(true)
+	  		}
+		})
+	},
+
+	isAdmin : function(groupName, username, callback) {
+
+		var query = `SELECT uc.is_admin FROM users_chatrooms uc WHERE uc.userid = (SELECT u.userid FROM users u WHERE u.username = '${username}') AND uc.chatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${groupName}')`
+
+		client.query(query, (err, res) => {
+
+			if (err) {
+	    		console.log(err.stack)
+	    		return
+	  		}
+	  		else {
+	  			return callback(res)
+	  		}
+		})
+	},
+
+	setAdmin : function(username, groupName, callback) {
+
+		var query = `UPDATE users_chatrooms SET is_admin = 'TRUE' WHERE userid = (SELECT u.userid FROM users u WHERE u.username = '${username}') AND chatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${groupName}')`
 
 		client.query(query, (err, res) => {
 

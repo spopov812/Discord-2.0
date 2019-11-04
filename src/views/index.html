@@ -239,6 +239,9 @@
 
           res['message'] = "$add {username}- Adds a person to the chat"
           addMessage(res)
+
+          res['message'] = "$admin {username}- Gives a person admin privileges"
+          addMessage(res)
         }
 
         else if (splitMsg[0] == "kick") {
@@ -251,10 +254,21 @@
         else if (splitMsg[0] == "add") {
 
           var userToAdd = splitMsg[1]
-          res['message'] = `Adding ${userToAdd} to ${currentRoom}...`
-          addMessage(res)
+          
           socket.emit('add to room', {
-            'username' : userToAdd,
+            'username' : username,
+            'userToAdd' : userToAdd,
+            'roomName' : currentRoom
+          })
+        }
+
+        else if (splitMsg[0] == "admin") {
+
+          var userToAdmin = splitMsg[1]
+
+          socket.emit('set admin', {
+            'username' : username,
+            'userToAdmin' : userToAdmin,
             'roomName' : currentRoom
           })
         }
@@ -272,7 +286,13 @@
         color = "style="
 
         if (info['username'] == username) {
+
           color += '"color : green;"'
+        }
+
+        else if (info['username'] == 'AUTO') {
+
+          color += '"color : red;"'
         }
 
         else{

@@ -157,7 +157,7 @@ io.on('connection', function(socket){
 			// Creates actual user
 			DB.createUser(info['username'], info['password'], function(res){
 
-				DB.addToRoom(info['username'], 'General', function(res) {
+				DB.addToRoom(info['username'], 'General', false, function(res) {
 
 					socket.emit('create account response', 'success')
 				})
@@ -165,24 +165,76 @@ io.on('connection', function(socket){
 		})
 	})
 
+	// Person adding a user to a room
 	socket.on('add to room', function(info){
 
-		console.log(`Adding ${info['username']} to ${info['roomName']}`)
+		// Checking if is admin
+		DB.isAdmin(info['roomName'], info['username'], function(res){
 
-		DB.addToRoom(info['username'], info['roomName'], function(res) {
+			// If the user is not an admin, do not let them add people
+			if (!res.rows[0].is_admin) {
 
-			return
+				// Notify user
+				socket.emit('chat message', 
+				{
+
+					'username' : 'AUTO',
+					'message' : 'You are not authorized to add people'
+				})
+
+				return
+			}
+
+			// If they are authorized to do so, add the user to the room
+			DB.addToRoom(info['userToAdd'], info['roomName'], false, function(res) {
+
+				console.log(`Adding ${info['userToAdd']} to ${info['roomName']}`)
+
+				// Emits update to whole chatroom
+				io.to(currentChatroom).emit('chat message', {
+					'username' : 'AUTO',
+					'message' : `${info['userToAdd']} has joined the chat!`
+				});
+			})
+		})	
+	})
+
+	socket.on('set admin', function(info){
+
+		// Checking if is admin
+		DB.isAdmin(info['roomName'], info['username'], function(res){
+
+			// If the user is not an admin, do not let them add people
+			if (!res.rows[0].is_admin) {
+
+				// Notify user
+				socket.emit('chat message', 
+				{
+
+					'username' : 'AUTO',
+					'message' : 'You are not authorized to set admin'
+				})
+
+				return
+			}
+
+			DB.setAdmin(info['userToAdmin'], info['roomName'], function(res){
+
+				io.to(currentChatroom).emit('chat message', {
+					'username' : 'AUTO',
+					'message' : `${info['userToAdmin']} has been set as an admin by ${info['username']}`
+				});
+			})
 		})
 	})
 
 	socket.on('create group', function(info){
 
-		console.log(info['icon'])
-
 		var groupName = info['groupname']
+		var groupNamePath = groupName.replace(' ', '_')
 
 		// Writing the icon to disk
-		fs.writeFile(`./src/public/assets/${groupName}_icon.png`, new Buffer(info['icon'], "base64"), function(err) {
+		fs.writeFile(`./src/public/assets/${groupNamePath}_icon.png`, new Buffer(info['icon'], "base64"), function(err) {
 	       if(err){
 	            console.log("Error: ", err)
 	            return
@@ -194,7 +246,7 @@ io.on('connection', function(socket){
 
 			console.log("Created new group with name: " + groupName)
 
-			DB.addToRoom(socketUsername, groupName, function(res) {
+			DB.addToRoom(socketUsername, groupName, true, function(res) {
 
 				console.log("Adding " + socketUsername + " to new " + groupName)
 
