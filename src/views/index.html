@@ -8,7 +8,9 @@
     <link rel="stylesheet" type="text/css" href="../css/index.css">
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/flatly/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="../css/index.css">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,400i,500,600|Righteous&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.10/css/mdb.min.css" rel="stylesheet">
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
   </head>
 
@@ -19,14 +21,17 @@
         <!-- Area for chat -->
         <div class="chatArea">
           <ul id="messages"></ul>
+          <div class="bg-white" id="inputArea">
+          <input class="inputBar p-3 border-light" id="m" autocomplete="off" type="text" onkeydown="sendMessage(this)" placeholder="Type a message here..." />
+          </div>
         </div>
 
         <!-- Active users -->
         <nav id="sidebar" class="navbar-light bg-light sidebar-right">
           <center>
-            <h1 id="currentRoom">Please select a room</h1>
+            <h2 id="currentRoom">Please select a room</h2>
             <hr/>
-            <h2>Active Users</h2>
+            <h3>Active Users</h3>
             <ul id="users"></ul>
           </center> 
         </nav>
@@ -34,9 +39,9 @@
         <!-- Groups -->
         <nav id="groupArea" class="navbar-light bg-light sidebar-left">
           <center>
-            <h2>Groups</h2>
+            <h3>Groups</h3>
             <button type="button" class="btn btn-outline-info" onclick="$('#createModal').modal('show')">Create Group</button>
-            <hr />
+            <hr class="mb-3" />
           </center>
           <ul id="groups">
           </ul>
@@ -44,7 +49,6 @@
 
         <!-- Chat message entry box -->
         
-        <input class="inputBar" id="m" autocomplete="off" type="text" onkeydown="sendMessage(this)" placeholder="Type here..." />
         
         
         <!-- User login/registration -->
@@ -73,7 +77,7 @@
                 <p id="userExists" style="color : red; display : none;">Username taken</p>
                 <br />
                 <br />
-                <input class="usernameInput" id="passwordCreate" type="password" placeholder="Password" />
+                <input class="usernameInput mr-2" id="passwordCreate" type="password" placeholder="Password" />
                 <input class="usernameInput" id="passwordCreateRe" type="password" placeholder="Re-type password" />
                 <p id="passMatch" style="color : red; display : none;">Passwords do not match</p>
                 <br />
@@ -169,11 +173,19 @@
       // Switching between different chatrooms
       function switchChatroom(chatroomName) {
 
+        $('.groupItem').removeClass("text-light")
+        $('.groupItem').css("background-color", "white")
+        $('.groupItem').addClass("shadow")
+        $(`#${chatroomName}`).css("background-color", "#14141f")
+        $(`#${chatroomName}`).addClass("text-light")
+        $(`#${chatroomName}`).removeClass("shadow")
+
         // Clears the name of the current room and its messages
         $('#currentRoom').empty()
         $('#messages').empty()
 
         // Sets name of current room
+        chatroomName = chatroomName.replace("_", " ")
         $('#currentRoom').append(chatroomName)
 
         // Joins the room
@@ -257,7 +269,7 @@
 
         // Icon path and options
         base_path = "../assets/"
-        options = 'height="50" width="50" onclick="switchChatroom(this.id)"'
+        options = 'onclick="switchChatroom(this.id)"'
 
         // Looping through all the user's chatrooms
         for (var i = 0; i < info['chatrooms'].length; i++) {
@@ -265,7 +277,7 @@
           chatroomName = info['chatrooms'][i]
           src = base_path + chatroomName.replace(" ", "_") + '_icon.png'
 
-          html = `<img src="${src}" ${options} id="${chatroomName}" /><h4>${chatroomName}</h4><hr />`
+          html = `<div class="groupItem p-2 mb-2 shadow" ${options} id="${chatroomName.replace(" ", "_")}"><div class="row"><div class="col-sm-4"><div class="groupImage rounded-circle bg-light" style="background-position: center center;background-size:cover;background-image:url(${src})"></div></div><div class="col-sm-8"><h4>${chatroomName}</h4></div></div></div>`
           console.log("Setting html- " + html)
 
           // Adding the possible groups to left area
@@ -286,7 +298,7 @@
           color += '"color : black;"'
         }
 
-        html = `<li><p ${color}>${info['username']}- </p><p>${info['message']}</p></li><hr />`
+        html = `<li class="p-0"><p class="p-0 m-0" ${color}>${info['username']}- </p><p class="p-0 m-0">${info['message']}</p></li><hr class="m-1" />`
 
         $('#messages').append(html)
         window.scrollTo(0, document.body.scrollHeight)

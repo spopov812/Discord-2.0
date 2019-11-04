@@ -1,14 +1,14 @@
 .sidebar-left {
-    min-width: 260px;
-    max-width: 260px;
+    min-width: 300px;
+    max-width: 300px;
     min-height: 100vh;
     position : absolute;
     left: 0;
 }
 
 .sidebar-right {
-  min-width: 260px;
-  max-width: 260px;
+  min-width: 300px;
+  max-width: 300px;
   min-height: 100vh;
   position : absolute;
   right: 0;
@@ -23,12 +23,15 @@
 
 .inputBar 
 {
-  position:absolute;
-  width:500px;
-  height:50px;
-  margin-left:-250px;
-  bottom:0px;
-  left:50%;
+  position: absolute;
+  width:40%;
+  height:45px;
+  bottom: 2%;
+  margin-left: 4%;
+}
+
+::placeholder {
+  opacity: .5;
 }
 
 .navbar {
@@ -38,10 +41,7 @@
 .chatArea {
   margin: auto;
   width: 50%;
-  padding: 10px;
-}
-
-.chatArea {
+  padding-top: 25px;
   display: inline;
   height: 100%;
 }
@@ -51,7 +51,7 @@ ul {
 }
 
 #messages {
-  height: 90%;
+  height: 85%;
   width: 45%;
   margin-left: auto;
   margin-right: auto;
@@ -68,6 +68,7 @@ ul {
   width: 100%;
   position: absolute;
   overflow-y: auto;
+  margin-left: -7%;
 }
 
 #sidebar {
@@ -88,4 +89,33 @@ ul {
 html, body {
   height: 100%;
   margin: 0;
+}
+
+html * {
+  font-family: 'Poppins', sans-sarif !important;
+}
+
+#m {
+  border-radius: 50px;
+}
+
+.groupItem {
+  border-radius: 10px;
+  height: 14%;
+  background-color: white;
+}
+
+.row {
+  height: 100%;
+}
+
+.groupImage {
+  width: 100%;
+  padding-top: 100%;
+}
+
+img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 50%;
 }
