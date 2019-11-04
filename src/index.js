@@ -5,9 +5,11 @@ var app = express()
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var port = process.env.PORT || 3000;
+const fs = require('fs')
 var path = require('path')
 var DB = require('./DB')
 
+global.Buffer = global.Buffer || require('buffer').Buffer
 
 var chatRoomsToUsers = {}
 
@@ -163,7 +165,30 @@ io.on('connection', function(socket){
 		})
 	})
 
-	socket.on('create group', function(groupName){
+	socket.on('add to room', function(info){
+
+		console.log(`Adding ${info['username']} to ${info['roomName']}`)
+
+		DB.addToRoom(info['username'], info['roomName'], function(res) {
+
+			return
+		})
+	})
+
+	socket.on('create group', function(info){
+
+		console.log(info['icon'])
+
+		var groupName = info['groupname']
+
+		// Writing the icon to disk
+		fs.writeFile(`./src/public/assets/${groupName}_icon.png`, new Buffer(info['icon'], "base64"), function(err) {
+	       if(err){
+	            console.log("Error: ", err)
+	            return
+	       }
+	       console.log("image converted and saved to dir")
+	  	})
 
 		DB.createGroup(groupName, function(res){
 

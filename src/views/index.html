@@ -2,11 +2,18 @@
 <html>
   <head>
     <title>Socket.IO chat</title>
+
+    <!-- Imports -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="../css/index.css">
+
+    <!-- Socket.io imports -->
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/flatly/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="../css/index.css">
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
@@ -101,7 +108,7 @@
                 <br />
                 <input type="file" id="newGroupIcon">
                 <br />
-                <button onclick="createGroup()" class="btn btn-outline-success" style="position:relative; top : 5px;">Create</button>
+                <button onclick="createGroup()" id="makeGroup" class="btn btn-outline-success" style="position:relative; top : 5px;">Create</button>
               </div>
             </div>
 
@@ -111,7 +118,9 @@
     <script>
 
       var username
-      var socket = io();
+      var currentRoom
+      var isAdmin
+      var socket = io()
 
       // Creating a name
       function submitLogin() {
@@ -134,8 +143,6 @@
         usernameLocal = $('#usernameCreate').val()
         password = $('#passwordCreate').val()
         passwordRe = $('#passwordCreateRe').val()
-
-        console.log(`Pass: ${password}, PassRe: ${passwordRe}`)
 
         // If pasword retype matches
         if (password != passwordRe){
@@ -161,9 +168,11 @@
       function createGroup() {
 
         file = document.getElementById('newGroupIcon').files[0]
-        console.log(file)
-        //fetch('/upload/image', {method: "POST", body: {'image' : file}});
-        socket.emit('create group', $('#newGroupName').val())
+
+        socket.emit('create group', {
+          'groupname' : $('#newGroupName').val(),
+          'icon' : file
+        })
       }
 
       // Switching between different chatrooms
@@ -176,6 +185,8 @@
         // Sets name of current room
         $('#currentRoom').append(chatroomName)
 
+        currentRoom = chatroomName
+
         // Joins the room
         socket.emit('switch room', chatroomName)
       }
@@ -186,14 +197,21 @@
         // Enter hit for message send
         if(event.key === 'Enter') {
 
-          console.log("Sending message from " + username)
+          // Parsing $ commands
+          var message = $('#m').val()
+
+          if (message[0] == '$'){
+            $('#m').val('')
+            handleCommand(message.substring(1))
+            return
+          }
 
           // Sending the message
           socket.emit('chat message', 
             {
 
               'username' : username,
-              'message': $('#m').val()
+              'message': message
 
             });
 
@@ -201,6 +219,70 @@
           $('#m').val('')
           return false
         }     
+      }
+
+      function handleCommand(message) {
+
+        var res = {
+          'username' : 'AUTO'
+        }
+
+        var splitMsg = message.split(" ")
+
+        if (splitMsg[0] == "help") {
+
+          res['message'] = "$help- Displays this message"
+          addMessage(res)
+
+          res['message'] = "$kick {username}- Kicks a person from the chat"
+          addMessage(res)
+
+          res['message'] = "$add {username}- Adds a person to the chat"
+          addMessage(res)
+        }
+
+        else if (splitMsg[0] == "kick") {
+
+          var userToKick = splitMsg[1]
+          res['message'] = `Kicking ${userToKick}...`
+          addMessage(res)
+        }
+
+        else if (splitMsg[0] == "add") {
+
+          var userToAdd = splitMsg[1]
+          res['message'] = `Adding ${userToAdd} to ${currentRoom}...`
+          addMessage(res)
+          socket.emit('add to room', {
+            'username' : userToAdd,
+            'roomName' : currentRoom
+          })
+        }
+
+        else {
+
+          res['message'] = "Unknown command, type $help for help"
+          addMessage(res)
+        }
+        
+      }
+
+      function addMessage(info) {
+
+        color = "style="
+
+        if (info['username'] == username) {
+          color += '"color : green;"'
+        }
+
+        else{
+          color += '"color : black;"'
+        }
+
+        html = `<li><p ${color}>${info['username']}- </p><p>${info['message']}</p></li><hr />`
+
+        $('#messages').append(html)
+        window.scrollTo(0, document.body.scrollHeight)
       }
 
       socket.on('create account response', function(res){
@@ -266,7 +348,6 @@
           src = base_path + chatroomName.replace(" ", "_") + '_icon.png'
 
           html = `<img src="${src}" ${options} id="${chatroomName}" /><h4>${chatroomName}</h4><hr />`
-          console.log("Setting html- " + html)
 
           // Adding the possible groups to left area
           $('#groups').append(html)
@@ -276,20 +357,7 @@
       // On receiving a chat message
       socket.on('chat message', function(info){
 
-        color = "style="
-
-        if (info['username'] == username) {
-          color += '"color : green;"'
-        }
-
-        else{
-          color += '"color : black;"'
-        }
-
-        html = `<li><p ${color}>${info['username']}- </p><p>${info['message']}</p></li><hr />`
-
-        $('#messages').append(html)
-        window.scrollTo(0, document.body.scrollHeight)
+        addMessage(info)
       })
 
       // Users logging in or out

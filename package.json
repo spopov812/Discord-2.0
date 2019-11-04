@@ -4,6 +4,7 @@
   "description": "my first socket.io app",
   "dependencies": {
     "bootstrap": "^3.4.1",
+    "buffer": "^5.4.3",
     "express": "^4.15.2",
     "mysql": "^2.17.1",
     "pg": "^7.12.1",
