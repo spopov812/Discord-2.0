@@ -41,10 +41,51 @@
   padding: 10px;
 }
 
-.chatArea p{
+.chatArea {
   display: inline;
+  height: 100%;
 }
 
 ul {
   list-style-type: none;
+}
+
+#messages {
+  height: 90%;
+  width: 45%;
+  margin-left: auto;
+  margin-right: auto;
+  position: absolute;
+  overflow-y: auto;
+}
+
+#groupArea {
+  height: 100%
+}
+
+#groups {
+  height: 70%;
+  width: 100%;
+  position: absolute;
+  overflow-y: auto;
+}
+
+#sidebar {
+  height: 100%
+}
+
+#users {
+  height: 70%;
+  width: 100%;
+  position: absolute;
+  overflow-y: auto;
+}
+
+::-webkit-scrollbar { 
+    display: none; 
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
 }
