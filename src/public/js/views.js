@@ -162,7 +162,7 @@ socket.on('valid login', function(info){
     chatroomName = info['chatrooms'][i]
     src = base_path + chatroomName.replace(" ", "_") + '_icon.png'
 
-    html = `<div class="groupItem p-2 mb-2 shadow" ${options} id="${chatroomName.replace(" ", "_")}"><div class=" groupRow"><div class="col-sm-4"><div class="groupImage rounded-circle bg-light" style="background-position: center center;background-size:cover;background-image:url(${src})"></div></div><div class="col-sm-8"><h4>${chatroomName}</h4></div></div></div>`
+    html = `<div class="groupItem p-2 mb-2 shadow" ${options} id="${chatroomName.replace(" ", "_")}"><div class="row groupRow"><div class="col-sm-4"><div class="groupImage rounded-circle bg-light" style="background-position: center center;background-size:cover;background-image:url(${src})"></div></div><div class="col-sm-8"><h4>${chatroomName}</h4></div></div></div>`
     console.log("Setting html- " + html)
 
     // Adding the possible groups to left area
