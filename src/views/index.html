@@ -15,9 +15,8 @@
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/flatly/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,400i,500,600|Righteous&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.10/css/mdb.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Fredoka+One|Poppins:300,400,400i,500,600|Righteous&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/816186e42a.js" crossorigin="anonymous"></script>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="../js/views.js"></script>
   </head>
@@ -30,14 +29,15 @@
         <div class="chatArea">
           <ul id="messages"></ul>
           <div class="bg-white" id="inputArea">
-            <input class="inputBar p-3 border-light" id="m" autocomplete="off" type="text" onkeydown="sendMessage(this)" placeholder="Type a message here..." />
+            <i class="fas fa-paperclip"></i>
+            <input class="inputBar border-light" id="m" autocomplete="off" type="text" onkeydown="sendMessage(this)" placeholder="Type a message here..." />
           </div>
         </div>
 
         <!-- Active users -->
         <nav id="sidebar" class="navbar-light bg-light sidebar-right">
           <center>
-            <h2 id="currentRoom">Please select a room</h2>
+            <h2 id="currentRoom font-weight-light">Please select a room</h2>
             <hr/>
             <h3>Active Users</h3>
             <ul id="users"></ul>
@@ -46,11 +46,15 @@
 
         <!-- Groups -->
         <nav id="groupArea" class="navbar-light bg-light sidebar-left">
-          <center>
-            <h3>Groups</h3>
-            <button type="button" class="btn btn-outline-info" onclick="$('#createModal').modal('show')">Create Group</button>
-            <hr class="mb-3" />
-          </center>
+          <div class="row">
+            <div class="col-sm-9 pt-2">
+              <h3 class="pl-2">Chats</h3>
+            </div>
+            <div class="col-sm-3 pt-2">
+              <button type="button" id="groupButton" class="btn rounded-circle shadow font-weight-light" onclick="$('#createModal').modal('show')">+</button>
+            </div>
+          </div>
+          <hr class="mb-3" />
           <ul id="groups">
           </ul>
         </nav>
@@ -69,18 +73,18 @@
                 <h4 class="modal-title">Welcome</h4>
               </div>
               <div class="modal-body">
-                <p>Login</p>
+                <p class="standardFont">Login</p>
 
                 <input class="usernameInput" id="usernameInput" type="text" maxlength="14" placeholder="Username"/>
                 <br />
                 <br />
                 <input class="usernameInput" id="passwordInput" type="password" placeholder="Password" />
                 <br />
-                <button onclick="submitLogin()" class="btn btn-outline-success" style="position:relative; top : 5px;">Submit</button>
+                <button onclick="submitLogin()" class="btn btn-outline-success mt-3" style="position:relative; top : 5px;">Submit</button>
 
                 <hr />
 
-                <p>Create Account</p>
+                <p class="standardFont">Create Account</p>
                 <input class="usernameInput" id="usernameCreate" type="text" maxlength="14" placeholder="Username"/>
                 <p id="userExists" style="color : red; display : none;">Username taken</p>
                 <br />
@@ -89,7 +93,7 @@
                 <input class="usernameInput" id="passwordCreateRe" type="password" placeholder="Re-type password" />
                 <p id="passMatch" style="color : red; display : none;">Passwords do not match</p>
                 <br />
-                <button onclick="createAccount()" class="btn btn-outline-success" style="position:relative; top : 5px;">Create</button>
+                <button onclick="createAccount()" class="btn btn-outline-success mt-3" style="position:relative; top : 5px;">Create</button>
 
               </div>
             </div>
