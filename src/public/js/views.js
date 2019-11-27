@@ -301,6 +301,7 @@ socket.on('user state update', function(usernames){
   }
 })
 
+// automatically scroll to bottom of messages @ new message
 function addObserverIfDesiredNodeAvailable() {
 
     var elementToObserve = document.querySelector("#messages");
@@ -311,7 +312,6 @@ function addObserverIfDesiredNodeAvailable() {
         return;
     }
     var observer = new MutationObserver(function() {
-      console.log('observer triggered');
       elementToObserve.scrollTop = elementToObserve.scrollHeight;
     });
 
