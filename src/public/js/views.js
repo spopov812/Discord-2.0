@@ -1,6 +1,7 @@
 var username
 var currentRoom
 var isAdmin
+var isInPrivateRoom
 var socket = io()
 
 // Creating a name
@@ -56,8 +57,22 @@ function createGroup() {
   })
 }
 
+function handleAttachment() {
+
+  console.log('Handling file saving...')
+
+  file = document.getElementById('attachmentFile').files[0]
+  
+  socket.emit('attachment', {
+    'groupname' : $('#newGroupName').val(),
+    'attachment' : file
+  })
+
+  $('#uploadModal').modal('hide');
+}
+
 // Switching between different chatrooms
-function switchChatroom(chatroomName) {
+function switchChatroom(chatroomName, isPrivate) {
 
   $('.groupItem').removeClass("text-light")
   $('.groupItem').css("background-color", "white")
@@ -76,8 +91,12 @@ function switchChatroom(chatroomName) {
 
   currentRoom = chatroomName
 
-  // Joins the room
-  socket.emit('switch room', chatroomName)
+  isInPrivateRoom = isPrivate
+
+  if (!isPrivate){
+    // Joins the room
+    socket.emit('switch room', chatroomName)
+  } 
 }
 
 // On submitting a chat message
@@ -95,14 +114,23 @@ function sendMessage(ele) {
       return
     }
 
-    // Sending the message
-    socket.emit('chat message', 
-      {
+    if (!isInPrivateRoom){
+      // Sending the message
+      socket.emit('chat message', 
+        {
 
-        'username' : username,
-        'message': message
+          'username' : username,
+          'message': message
 
-      });
+        });
+    }
+
+    else {
+
+      console.log("current room " + chatroomName)
+      addMessage({'username' : username, 'message' : message})
+      socket.emit('private message sent', {'from' : username, 'to' : currentRoom, 'message' : message})
+    }
 
     // Clearing message from input bar
     $('#m').val('')
@@ -137,11 +165,19 @@ function handleCommand(message) {
 
     var userToKick = splitMsg[1]
 
-    socket.emit('kick', {
-      'username' : username,
-      'userToKick' : userToKick,
-      'roomName' : currentRoom
-    })
+    if (userToKick == username) {
+
+      res['message'] = "Error- you cannot kick yourself"
+      addMessage(res)
+    }
+
+    else {
+      socket.emit('kick', {
+        'username' : username,
+        'userToKick' : userToKick,
+        'roomName' : currentRoom
+      })
+    }
   }
 
   else if (splitMsg[0] == "add") {
@@ -172,6 +208,59 @@ function handleCommand(message) {
     addMessage(res)
   }
   
+}
+
+function addChatroom(chatroomName, isPrivate) {
+
+  // Icon path and options
+  basePath = "../assets/"
+  options = `onclick="switchChatroom('${chatroomName}', ${isPrivate})"`
+
+  if (!isPrivate) {
+    src = basePath + chatroomName.replace(" ", "_") + '_icon.png'
+  }
+
+  else {
+    src = basePath + 'private_icon.png'
+  }
+
+
+  html = `
+    <div class="groupItem p-2 mb-2 shadow" ${options} id="${chatroomName.replace(" ", "_")}">
+      <div class="row">
+        <div class="col-sm-4">
+          <div class="groupImage rounded-circle bg-light" style="background-position: center center;background-size:cover;background-image:url(${src})">
+          </div>
+        </div
+        <div class="col-sm-8">
+          <h4>${chatroomName}</h4>
+        </div>
+      </div>
+    </div>`
+
+  // Adding the possible groups to left area
+  $('#groups').append(html)
+}
+
+// Handles sending private messages between users
+function privateMessage(userToMessage) {
+
+  // If user wants to private message themselves
+  if (userToMessage == username) {
+
+    var res = {
+      'username' : 'AUTO'
+    }
+
+    res['message'] = "Error- you cannot message yourself"
+    addMessage(res)
+
+    return
+  }
+
+  addChatroom(userToMessage, true)
+
+  socket.emit('new private message', {'userToMessage' : userToMessage})
 }
 
 function addMessage(info) {
@@ -238,8 +327,28 @@ socket.on('create group response', function(res){
   // Hiding modal and handling page refresh
   console.log("Successfully created a new group")
   $('#createModal').modal('hide');
+})
 
+socket.on('add chatroom', function(info){
 
+  console.log('Received request to add a chatroom')
+
+  if (username == info['username']) {
+
+    addChatroom(info['userToMessage'], true)
+  }
+})
+
+socket.on('private message', function(info){
+
+  console.log('New private message- ')
+  console.log(info)
+
+  // TODO info['from'] == currentRoom
+  if (info['to'] == username){
+
+    addMessage({'username' : info['from'], 'message' : info['message']})
+  }
 })
 
 // Valid username/password
@@ -250,23 +359,14 @@ socket.on('valid login', function(info){
   // Removes login page
   $('#loginModal').modal('hide')
 
-  // Icon path and options
-  base_path = "../assets/"
-  options = 'onclick="switchChatroom(this.id)"'
+  
 
   // Looping through all the user's chatrooms
   for (var i = 0; i < info['chatrooms'].length; i++) {
 
     chatroomName = info['chatrooms'][i]
-    src = base_path + chatroomName.replace(" ", "_") + '_icon.png'
 
-
-    //html = `<img src="${src}" ${options} id="${chatroomName}" /><h4>${chatroomName}</h4><hr />`
-
-    html = `<div class="groupItem p-2 mb-2 shadow" ${options} id="${chatroomName.replace(" ", "_")}"><div class="row"><div class="col-sm-4"><div class="groupImage rounded-circle bg-light" style="background-position: center center;background-size:cover;background-image:url(${src})"></div></div><div class="col-sm-8"><h4>${chatroomName}</h4></div></div></div>`
-
-    // Adding the possible groups to left area
-    $('#groups').append(html)
+    addChatroom(chatroomName, false)
   }
 })
 
@@ -292,8 +392,14 @@ socket.on('user state update', function(usernames){
   // Clearing active users
   $('#users').empty()
 
+
   // Adding the users
   for (var i = 0; i < usernames.length; i++) {
-    $('#users').append($('<h4 id="' + usernames[i] + '">').text(usernames[i]))
+    console.log("ADDING USER")
+
+    option = `"privateMessage('` + usernames[i] + `')"`
+
+    html = `<a onclick=${option}><h4>${usernames[i]}</h4></a>`
+    $('#users').append(html)
   }
 })

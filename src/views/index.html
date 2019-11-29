@@ -29,7 +29,7 @@
         <div class="chatArea">
           <ul id="messages"></ul>
           <div class="bg-white" id="inputArea">
-            <i class="fas fa-paperclip"></i>
+          <i class="fas fa-paperclip" onclick="$('#uploadModal').modal('show')"></i>
             <input class="inputBar border-light" id="m" autocomplete="off" type="text" onkeydown="sendMessage(this)" placeholder="Type a message here..." />
           </div>
         </div>
@@ -37,8 +37,6 @@
         <!-- Active users -->
         <nav id="sidebar" class="navbar-light bg-light sidebar-right">
           <center>
-            <h2 id="currentRoom font-weight-light">Please select a room</h2>
-            <hr/>
             <h3>Active Users</h3>
             <ul id="users"></ul>
           </center> 
@@ -48,7 +46,7 @@
         <nav id="groupArea" class="navbar-light bg-light sidebar-left">
           <div class="row">
             <div class="col-sm-9 pt-2">
-              <h3 class="pl-2">Chats</h3>
+              <h3 class="pl-2">Group Chats</h3>
             </div>
             <div class="col-sm-3 pt-2">
               <button type="button" id="groupButton" class="btn rounded-circle shadow font-weight-light" onclick="$('#createModal').modal('show')">+</button>
@@ -118,6 +116,26 @@
                 <input type="file" id="newGroupIcon">
                 <br />
                 <button onclick="createGroup()" id="makeGroup" class="btn btn-outline-success" style="position:relative; top : 5px;">Create</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Attachment upload -->
+        <div id="uploadModal" class="modal fade">
+          <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Upload a file</h4>
+              </div>
+              <div class="modal-body">
+  
+                <input type="file" id="attachmentFile">
+                <br />
+                <button onclick="handleAttachment()" class="btn btn-outline-success" style="position:relative; top : 5px;">Send</button>
               </div>
             </div>
 

@@ -57,13 +57,13 @@ io.on('connection', function(socket){
 			for (var i = 0; i < res.rows.length; i++){
 				socket.emit('chat message', 
 				{
-
 					'username' : res.rows[i]['username'],
 					'message' : res.rows[i]['message']
 				})
 			}
 		})
 
+		console.log('Emitting changes')
 		io.to(currentChatroom).emit('user state update', chatRoomsToUsers[currentChatroom])
 
 		console.log("Chatroom layout- ")
@@ -103,6 +103,21 @@ io.on('connection', function(socket){
 			'username' : info['username'],
 			'message' : info['message']
 		});
+	})
+
+	socket.on('new private message', function(info) {
+
+		var userToMessage = info['userToMessage']
+
+		io.emit('add chatroom', {'username' : userToMessage, 'userToMessage' : socketUsername})
+	})
+
+	socket.on('private message sent', function(info) {
+
+		console.log('received request for new private message')
+		console.log(info)
+
+		io.emit('private message', {'from' : socketUsername, 'to' : info['to'], 'message' : info['message']})
 	})
 
 	// Initializing the user's info on login
@@ -309,6 +324,28 @@ io.on('connection', function(socket){
 				socket.emit('create group response', 'success')
 			})
 		})
+	})
+
+	socket.on('attachment', function(info){
+
+		console.log('Saving file')
+
+		filename = Math.floor(Math.random() * 1000) + 1
+
+		// Writing the icon to disk
+		fs.writeFile(`./src/public/assets/${filename}`, new Buffer(info['attachment'], "base64"), function(err) {
+	       if(err){
+	            console.log("Error: ", err)
+	            return
+	       }
+	       console.log('File saved')
+	  	})
+
+		message = `<img src="../assets/${filename}">`
+
+		DB.saveMessage(message, socketUsername, currentChatroom)
+
+	  	io.to(currentChatroom).emit('chat message', {'username' : socketUsername, 'message' : message})
 	})
 });
 
