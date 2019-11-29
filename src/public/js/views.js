@@ -84,8 +84,11 @@ function switchChatroom(chatroomName, isPrivate) {
   // Clears the name of the current room and its messages
   $('#currentRoom').empty()
   $('#messages').empty()
+  $('#currentImg').empty()
 
   // Sets name of current room
+  src = '../assets/' + chatroomName + '_icon.png'
+  $('#currentImg').css({'background-image':`url(${src})`, 'height':'55px', 'width':'55px', 'margin-left':'40px'})
   chatroomName = chatroomName.replace("_", " ")
   $('#currentRoom').append(chatroomName)
 
@@ -366,7 +369,14 @@ socket.on('valid login', function(info){
 
     chatroomName = info['chatrooms'][i]
 
+<<<<<<< HEAD
     addChatroom(chatroomName, false)
+=======
+    html = `<div class="groupItem p-2 mb-2 shadow" ${options} id="${chatroomName.replace(" ", "_")}"><div class="row no-gutters"><div class="col-sm-2"><div class="groupImage rounded-circle bg-light" style="background-position: center center;background-size:cover;background-image:url(${src})"></div></div><div class="col-sm-9"><p class="mt-1 ml-4 chatroomName">${chatroomName}</p></div></div></div>`
+
+    // Adding the possible groups to left area
+    $('#groups').append(html)
+>>>>>>> 5f7fa78dd8d605004c9cd56aa28797489533b71d
   }
 })
 
@@ -403,3 +413,22 @@ socket.on('user state update', function(usernames){
     $('#users').append(html)
   }
 })
+
+// automatically scroll to bottom of messages @ new message
+function addObserverIfDesiredNodeAvailable() {
+
+    var elementToObserve = document.querySelector("#messages");
+    if(!elementToObserve) {
+        //The node we need does not exist yet.
+        //Wait 500ms and try again
+        window.setTimeout(addObserverIfDesiredNodeAvailable,500);
+        return;
+    }
+    var observer = new MutationObserver(function() {
+      elementToObserve.scrollTop = elementToObserve.scrollHeight;
+    });
+
+    var config = {childList: true};
+    observer.observe(elementToObserve,config);
+}
+addObserverIfDesiredNodeAvailable();

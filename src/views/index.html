@@ -23,14 +23,52 @@
 
   <body onload='$("#loginModal").modal("show")'>
 
+    <div class="banner shadow-sm">
+      <h4 id="bannerContent" class="font-weight-bold">Discord 2.0</h4>
+    </div>
+
     <div class="wrapper">
+
+        <!-- Groups -->
+        <nav id="groupArea" class="navbar-light sidebar-left">
+          <div id="profileBar" class="shadow-sm">
+            <i class="gradient-icon fas fa-comment-alt"></i> 
+            <i class="left-icon fas fa-phone-alt"></i> <i class="left-icon fas fa-envelope"></i> <i class="left-icon fas fa-users"></i>
+            <div id="profileImg" class="rounded-circle bg-light" style="height:40px; width:40px; margin:20px; background-image:url('../assets/profile_placeholder.png');"></div>
+          </div>
+          <div class="row mt-3" id="groupsBar">
+            <div class="col-sm-9 pt-2">
+              <h3 style="padding-left: 20px;">Chats</h3>
+            </div>
+            <div class="col-sm-3 pt-2">
+              <button type="button" id="groupButton" class="btn rounded-circle shadow font-weight-light ml-2" onclick="$('#createModal').modal('show')">+</button>
+            </div>
+          </div>
+          <hr class="mt-3 mb-3 side-hr"/>
+          <div class="row mt-2" id="groupsContent">
+            <div class="col-sm-12">
+              <ul id="groups">
+              </ul>
+            </div>
+          </div>
+        </nav>
 
         <!-- Chat message entry box -->
         <div class="chatArea">
+          <div id="roomBar" class="shadow-sm">
+            <div id="currentImg" class="rounded-circle bg-light"></div>
+            <h4 id="currentRoom">Please select a room</h4>
+            <div style="margin-left: auto; margin-right: 10px;"><i class="chat-icon fas fa-phone-alt"></i><i class="chat-icon fas fa-video"></i><i class="chat-icon fas fa-ellipsis-h"></i></div>
+          </div>
           <ul id="messages"></ul>
           <div class="bg-white" id="inputArea">
           <i class="fas fa-paperclip" onclick="$('#uploadModal').modal('show')"></i>
             <input class="inputBar border-light" id="m" autocomplete="off" type="text" onkeydown="sendMessage(this)" placeholder="Type a message here..." />
+            <i class="fas fa-paperclip"></i>
+            <div id="inputBar">
+              <input class="border-light" id="m" autocomplete="off" type="text" onkeydown="sendMessage(this)" placeholder="Type a message here..." />
+              <button class="btn rounded-circle" id="sendButton"><i class="fas fa-paper-plane"></i></button>
+            </div> 
           </div>
         </div>
 
@@ -57,8 +95,13 @@
           </ul>
         </nav>
 
-        
-        
+        <nav id="sidebar" class="navbar-light sidebar-right">
+          <center style="margin-top: 25px;">
+            <h3 style="margin-bottom: 40px;">Active Users</h3>
+            <ul id="users"></ul>
+          </center> 
+        </nav>
+
         
         
         <!-- User login/registration -->
@@ -78,7 +121,7 @@
                 <br />
                 <input class="usernameInput" id="passwordInput" type="password" placeholder="Password" />
                 <br />
-                <button onclick="submitLogin()" class="btn btn-outline-success mt-3" style="position:relative; top : 5px;">Submit</button>
+                <button onclick="submitLogin()" class="btn mt-3" style="position:relative; top : 5px; color: white;">Submit</button>
 
                 <hr />
 
@@ -91,7 +134,7 @@
                 <input class="usernameInput" id="passwordCreateRe" type="password" placeholder="Re-type password" />
                 <p id="passMatch" style="color : red; display : none;">Passwords do not match</p>
                 <br />
-                <button onclick="createAccount()" class="btn btn-outline-success mt-3" style="position:relative; top : 5px;">Create</button>
+                <button onclick="createAccount()" class="btn mt-3" style="position:relative; top : 5px; color: white">Create</button>
 
               </div>
             </div>
@@ -109,13 +152,13 @@
                 <h4 class="modal-title">Create a Group</h4>
               </div>
               <div class="modal-body">
-                <p>Name</p>
+                <p class="mb-1 font-weight-bold">Name</p>
 
-                <input class="usernameInput" id="newGroupName" type="text" maxlength="14" placeholder="Group name"/>
+                <input class="usernameInput mb-2" id="newGroupName" type="text" maxlength="14" placeholder="Group name"/>
                 <br />
                 <input type="file" id="newGroupIcon">
                 <br />
-                <button onclick="createGroup()" id="makeGroup" class="btn btn-outline-success" style="position:relative; top : 5px;">Create</button>
+                <button onclick="createGroup()" id="makeGroup" class="btn mt-2" style="position:relative; top : 5px; color: white">Create</button>
               </div>
             </div>
 
@@ -142,5 +185,6 @@
           </div>
         </div>
     </div>
+
   </body>
 </html>
