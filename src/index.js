@@ -63,11 +63,7 @@ io.on('connection', function(socket){
 			}
 		})
 
-		console.log('Emitting changes')
 		io.to(currentChatroom).emit('user state update', chatRoomsToUsers[currentChatroom])
-
-		console.log("Chatroom layout- ")
-		console.log(chatRoomsToUsers)
 	})
 
 	// Socket listening for when a user leaves the site
@@ -176,7 +172,7 @@ io.on('connection', function(socket){
 			// Creates actual user
 			DB.createUser(info['username'], info['password'], function(res){
 
-				DB.addToRoom(info['username'], 'General', false, function(res) {
+				DB.addToRoom(info['username'], 'General', 1, function(res) {
 
 					socket.emit('create account response', 'success')
 				})
@@ -188,10 +184,10 @@ io.on('connection', function(socket){
 	socket.on('add to room', function(info){
 
 		// Checking if is admin
-		DB.isAdmin(info['roomName'], info['username'], function(res){
+		DB.getAdminLevel(info['roomName'], info['username'], function(res){
 
-			// If the user is not an admin, do not let them add people
-			if (!res.rows[0].is_admin) {
+			// If the user is at admin level 1, do not let them add people
+			if (res.rows[0].admin_level == 1) {
 
 				// Notify user
 				socket.emit('chat message', 
@@ -205,7 +201,7 @@ io.on('connection', function(socket){
 			}
 
 			// If they are authorized to do so, add the user to the room
-			DB.addToRoom(info['userToAdd'], info['roomName'], false, function(res) {
+			DB.addToRoom(info['userToAdd'], info['roomName'], 1, function(res) {
 
 				console.log(`Adding ${info['userToAdd']} to ${info['roomName']}`)
 
@@ -214,6 +210,8 @@ io.on('connection', function(socket){
 					'username' : 'AUTO',
 					'message' : `${info['userToAdd']} has joined the chat!`
 				});
+
+				io.emit('refresh', {'username' : info['userToAdd']})
 			})
 		})	
 	})
@@ -222,10 +220,10 @@ io.on('connection', function(socket){
 	socket.on('set admin', function(info){
 
 		// Checking if is admin
-		DB.isAdmin(info['roomName'], info['username'], function(res){
+		DB.getAdminLevel(info['roomName'], info['username'], function(personSetting){
 
-			// If the user is not an admin, do not let them add people
-			if (!res.rows[0].is_admin) {
+			// If the user is at admin level 1, do not let them set privileges
+			if (personSetting.rows[0].admin_level == 1) {
 
 				// Notify user
 				socket.emit('chat message', 
@@ -238,26 +236,46 @@ io.on('connection', function(socket){
 				return
 			}
 
-			// Updating the admin privilege in the database
-			DB.setAdmin(info['userToAdmin'], info['roomName'], function(res){
+			DB.getAdminLevel(info['roomName'], info['userToAdmin'], function(personBeingSet){
 
-				// Sending message to the chatroom of the update
-				io.to(currentChatroom).emit('chat message', {
-					'username' : 'AUTO',
-					'message' : `${info['userToAdmin']} has been set as an admin by ${info['username']}`
-				});
+				// If the two people are on the same privilege level
+				if (personSetting.rows[0].admin_level == personBeingSet.rows[0].admin_level) {
+
+					// Notify user
+					socket.emit('chat message', 
+					{
+
+						'username' : 'AUTO',
+						'message' : 'You can only give admin privileges to people lower than your level'
+					})
+
+					return
+				}
+
+				// Updating the admin privilege to 2 in the database
+				DB.setAdminLevel(info['userToAdmin'], info['roomName'], 2, function(res){
+
+					// Sending message to the chatroom of the update
+					io.to(currentChatroom).emit('chat message', {
+						'username' : 'AUTO',
+						'message' : `${info['userToAdmin']} has been set as an admin by ${info['username']}`
+					});
+				})
 			})
 		})
 	})
 
-	// Socket listening for the user to be kicked
-	socket.on('kick', function(info){
+	// Socket listening for the user to be removed
+	socket.on('remove', function(info){
+
+		var removingSelf = info['username'] == info['userToRemove']
 
 		// Checking if is admin
-		DB.isAdmin(info['roomName'], info['username'], function(res){
+		DB.getAdminLevel(info['roomName'], info['username'], function(personRemoving){
 
-			// If the user is not an admin, do not let them add people
-			if (!res.rows[0].is_admin) {
+			// If the user is not at admin level, do not let them kick people
+			// If user is not trying to remove themselves (leave group)
+			if (personRemoving.rows[0].admin_level == 1 && !removingSelf) {
 
 				// Notify user
 				socket.emit('chat message', 
@@ -270,17 +288,49 @@ io.on('connection', function(socket){
 				return
 			}
 
-			// Updating the kick in the database
-			DB.kick(info['userToKick'], info['roomName'], function(res){
+		// Getting the admin privelege level of the user to remove
+		DB.getAdminLevel(info['roomName'], info['userToRemove'], function(personToRemove){
 
-				// Sends message to room about the update
-				io.to(currentChatroom).emit('chat message', {
-					'username' : 'AUTO',
-					'message' : `${info['userToKick']} has been kicked by ${info['username']}`
-				});
+				// If the users are at the same admin level, do not kick
+				// If user is not trying to remove themselves (leave group)
+				if (personRemoving.rows[0].admin_level == personToRemove.rows[0].admin_level && !removingSelf) {
 
-				// Sends message to all users of the username that was kicked. That users page will refresh
-				io.to(currentChatroom).emit('refresh', {'username' : info['userToKick']})
+					// Notify user
+					socket.emit('chat message', 
+					{
+
+						'username' : 'AUTO',
+						'message' : 'You cannot kick other admins'
+					})
+
+					return
+				}
+
+				// Updating the removal in the database
+				DB.kick(info['userToRemove'], info['roomName'], function(res){
+
+					if (!info['quietly']) {
+						// Sends message to room about the update
+						io.to(currentChatroom).emit('chat message', {
+							'username' : 'AUTO',
+							'message' : `${info['userToRemove']} has been kicked by ${info['username']}`
+						});
+					}
+
+					// Admin deleting group
+					if(removingSelf && personRemoving.rows[0].admin_level == 3) {
+
+						DB.deleteGroup(info['roomName'], function(res) {
+
+							// Sends message to all users of the username that was kicked. That users page will refresh
+							io.to(currentChatroom).emit('refresh', {'username' : 'ALL'})
+							return
+						})
+					}
+
+					// Sends message to all users of the username that was kicked. That users page will refresh
+					io.to(currentChatroom).emit('refresh', {'username' : info['userToRemove']})
+				})
 			})
 		})
 	})
@@ -306,7 +356,7 @@ io.on('connection', function(socket){
 			console.log("Created new group with name: " + groupName)
 
 			// Adding the user that created the group
-			DB.addToRoom(socketUsername, groupName, true, function(res) {
+			DB.addToRoom(socketUsername, groupName, 3, function(res) {
 
 				console.log("Adding " + socketUsername + " to new " + groupName)
 

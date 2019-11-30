@@ -87,9 +87,10 @@ function switchChatroom(chatroomName, isPrivate) {
   $('#currentImg').empty()
 
   // Sets name of current room
-  src = '../assets/' + chatroomName + '_icon.png'
+  src = '../assets/' + chatroomName.replace(" ", "_") + '_icon.png'
+
   $('#currentImg').css({'background-image':`url(${src})`, 'height':'55px', 'width':'55px', 'margin-left':'40px'})
-  chatroomName = chatroomName.replace("_", " ")
+  
   $('#currentRoom').append(chatroomName)
 
   currentRoom = chatroomName
@@ -157,6 +158,9 @@ function handleCommand(message) {
     res['message'] = "$kick {username}- Kicks a person from the chat"
     addMessage(res)
 
+    res['message'] = "$leave- Will remove you from the chatroom"
+    addMessage(res)
+
     res['message'] = "$add {username}- Adds a person to the chat"
     addMessage(res)
 
@@ -170,15 +174,16 @@ function handleCommand(message) {
 
     if (userToKick == username) {
 
-      res['message'] = "Error- you cannot kick yourself"
+      res['message'] = "Error- you cannot kick yourself, to leave type $leave"
       addMessage(res)
     }
 
     else {
-      socket.emit('kick', {
+      socket.emit('remove', {
         'username' : username,
-        'userToKick' : userToKick,
-        'roomName' : currentRoom
+        'userToRemove' : userToKick,
+        'roomName' : currentRoom,
+        'quietly' : false
       })
     }
   }
@@ -205,12 +210,27 @@ function handleCommand(message) {
     })
   }
 
+  else if (splitMsg[0] == "leave") {
+
+    $('#leaveModal').modal('show')
+  }
+
   else {
 
     res['message'] = "Unknown command, type $help for help"
     addMessage(res)
   }
   
+}
+
+function leave() {
+
+  socket.emit('remove', {
+    'username' : username,
+    'userToRemove' : username,
+    'roomName' : currentRoom,
+    'quietly' : true
+  })
 }
 
 function addChatroom(chatroomName, isPrivate) {
@@ -368,15 +388,7 @@ socket.on('valid login', function(info){
   for (var i = 0; i < info['chatrooms'].length; i++) {
 
     chatroomName = info['chatrooms'][i]
-
-<<<<<<< HEAD
     addChatroom(chatroomName, false)
-=======
-    html = `<div class="groupItem p-2 mb-2 shadow" ${options} id="${chatroomName.replace(" ", "_")}"><div class="row no-gutters"><div class="col-sm-2"><div class="groupImage rounded-circle bg-light" style="background-position: center center;background-size:cover;background-image:url(${src})"></div></div><div class="col-sm-9"><p class="mt-1 ml-4 chatroomName">${chatroomName}</p></div></div></div>`
-
-    // Adding the possible groups to left area
-    $('#groups').append(html)
->>>>>>> 5f7fa78dd8d605004c9cd56aa28797489533b71d
   }
 })
 
@@ -390,7 +402,7 @@ socket.on('chat message', function(info){
 socket.on('refresh', function(info){
 
   // If this user needs to refresh the page
-  if (username == info['username']) {
+  if (username == info['username'] || info['username'] == 'ALL') {
 
     location.reload()
   }

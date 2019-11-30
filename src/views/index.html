@@ -62,9 +62,7 @@
           </div>
           <ul id="messages"></ul>
           <div class="bg-white" id="inputArea">
-          <i class="fas fa-paperclip" onclick="$('#uploadModal').modal('show')"></i>
-            <input class="inputBar border-light" id="m" autocomplete="off" type="text" onkeydown="sendMessage(this)" placeholder="Type a message here..." />
-            <i class="fas fa-paperclip"></i>
+            <i class="fas fa-paperclip" onclick="$('#uploadModal').modal('show')"></i>
             <div id="inputBar">
               <input class="border-light" id="m" autocomplete="off" type="text" onkeydown="sendMessage(this)" placeholder="Type a message here..." />
               <button class="btn rounded-circle" id="sendButton"><i class="fas fa-paper-plane"></i></button>
@@ -79,30 +77,6 @@
             <ul id="users"></ul>
           </center> 
         </nav>
-
-        <!-- Groups -->
-        <nav id="groupArea" class="navbar-light bg-light sidebar-left">
-          <div class="row">
-            <div class="col-sm-9 pt-2">
-              <h3 class="pl-2">Group Chats</h3>
-            </div>
-            <div class="col-sm-3 pt-2">
-              <button type="button" id="groupButton" class="btn rounded-circle shadow font-weight-light" onclick="$('#createModal').modal('show')">+</button>
-            </div>
-          </div>
-          <hr class="mb-3" />
-          <ul id="groups">
-          </ul>
-        </nav>
-
-        <nav id="sidebar" class="navbar-light sidebar-right">
-          <center style="margin-top: 25px;">
-            <h3 style="margin-bottom: 40px;">Active Users</h3>
-            <ul id="users"></ul>
-          </center> 
-        </nav>
-
-        
         
         <!-- User login/registration -->
         <div id="loginModal" class="modal fade" data-backdrop="static">
@@ -159,6 +133,27 @@
                 <input type="file" id="newGroupIcon">
                 <br />
                 <button onclick="createGroup()" id="makeGroup" class="btn mt-2" style="position:relative; top : 5px; color: white">Create</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Modal for when a user leaves a group -->
+        <div id="leaveModal" class="modal fade">
+          <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Leave Group</h4>
+              </div>
+              <div class="modal-body">
+                <p class="mb-1 font-weight-bold">Are you sure you want to leave the group?</p>
+
+                <p class="mb-1 font-weight-bold">Note- if you created the group, the whole group will be deleted</p>
+
+                <button onclick="leave()" id="makeGroup" class="btn mt-2" style="position:relative; top : 5px; color: white">Leave</button>
               </div>
             </div>
 

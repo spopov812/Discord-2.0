@@ -107,10 +107,10 @@ module.exports = {
 		})
 	},
 
-	addToRoom : function(username, roomName, isAdmin, callback){
+	addToRoom : function(username, roomName, adminLevel, callback){
 
 
-		var query = `INSERT INTO users_chatrooms (userid, chatroomid, is_admin) VALUES ((SELECT u.userid FROM users u WHERE u.username = '${username}'), (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${roomName}'), '${isAdmin}')`
+		var query = `INSERT INTO users_chatrooms (userid, chatroomid, admin_level) VALUES ((SELECT u.userid FROM users u WHERE u.username = '${username}'), (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${roomName}'), '${adminLevel}')`
 		
 		client.query(query, function(err, res) {
 			if (err) {
@@ -119,20 +119,6 @@ module.exports = {
 	  		}
 	  		
 			return callback(res)
-		})
-	},
-
-	// Will save the last chat room a user was in when they log out
-	saveLastRoom : function(username, chatroomName) {
-
-		var query = "UPDATE users SET lastchatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '" + chatroomName + "') WHERE username = '" + username + "'"
-
-		// Save last room in DB
-		client.query(query, (err, res) => {
-
-			if (err) {
-	    		console.log(err.stack)
-	  		}
 		})
 	},
 
@@ -155,9 +141,9 @@ module.exports = {
 	},
 
 	// Checks if a user is the admin in a group
-	isAdmin : function(groupName, username, callback) {
+	getAdminLevel : function(groupName, username, callback) {
 
-		var query = `SELECT uc.is_admin FROM users_chatrooms uc WHERE uc.userid = (SELECT u.userid FROM users u WHERE u.username = '${username}') AND uc.chatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${groupName}')`
+		var query = `SELECT uc.admin_level FROM users_chatrooms uc WHERE uc.userid = (SELECT u.userid FROM users u WHERE u.username = '${username}') AND uc.chatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${groupName}')`
 
 		// Execute query
 		client.query(query, (err, res) => {
@@ -173,9 +159,9 @@ module.exports = {
 	},
 
 	// Updating user's admin privileges in the group
-	setAdmin : function(username, groupName, callback) {
+	setAdminLevel : function(username, groupName, adminLevel, callback) {
 
-		var query = `UPDATE users_chatrooms SET is_admin = 'TRUE' WHERE userid = (SELECT u.userid FROM users u WHERE u.username = '${username}') AND chatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${groupName}')`
+		var query = `UPDATE users_chatrooms SET admin_level = ${adminLevel} WHERE userid = (SELECT u.userid FROM users u WHERE u.username = '${username}') AND chatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${groupName}')`
 
 		// Execute query
 		client.query(query, (err, res) => {
@@ -194,6 +180,23 @@ module.exports = {
 	kick : function(username, groupName, callback) {
 
 		var query = `DELETE FROM users_chatrooms WHERE userid = (SELECT u.userid FROM users u WHERE u.username = '${username}') AND chatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${groupName}')`
+
+		// Execute query
+		client.query(query, (err, res) => {
+
+			if (err) {
+	    		console.log(err.stack)
+	    		return
+	  		}
+	  		else {
+	  			return callback(true)
+	  		}
+		})
+	},
+
+	deleteGroup : function(groupName, callback) {
+
+		var query = `DELETE FROM users_chatrooms uc WHERE uc.chatroomid = (SELECT c.chatroomid FROM chatrooms c WHERE c.name = '${groupName}')`
 
 		// Execute query
 		client.query(query, (err, res) => {
