@@ -4,6 +4,7 @@ var isAdmin
 var isInPrivateRoom
 var socket = io()
 
+
 // Creating a name
 function submitLogin() {
   
@@ -77,9 +78,9 @@ function switchChatroom(chatroomName, isPrivate) {
   $('.groupItem').removeClass("text-light")
   $('.groupItem').css("background-color", "white")
   $('.groupItem').addClass("shadow")
-  $(`#${chatroomName}`).css("background-color", "#14141f")
-  $(`#${chatroomName}`).addClass("text-light")
-  $(`#${chatroomName}`).removeClass("shadow")
+  $(`#${chatroomName.replace(" ", "_")}`).css("background-color", "#14141f")
+  $(`#${chatroomName.replace(" ", "_")}`).addClass("text-light")
+  $(`#${chatroomName.replace(" ", "_")}`).removeClass("shadow")
 
   // Clears the name of the current room and its messages
   $('#currentRoom').empty()
@@ -88,6 +89,12 @@ function switchChatroom(chatroomName, isPrivate) {
 
   // Sets name of current room
   src = '../assets/' + chatroomName.replace(" ", "_") + '_icon.png'
+  
+  if(isPrivate) {
+    if(!urlExists(src)) {
+      src = '../assets/' + 'profile_placeholder.png'
+    }
+  }
 
   $('#currentImg').css({'background-image':`url(${src})`, 'height':'55px', 'width':'55px', 'margin-left':'40px'})
   
@@ -244,19 +251,22 @@ function addChatroom(chatroomName, isPrivate) {
   }
 
   else {
-    src = basePath + 'private_icon.png'
+    src = basePath + chatroomName.replace(" ", "_") + '_icon.png'
+    if(!urlExists(src)) {
+      src = basePath + 'profile_placeholder.png'
+    }
   }
 
 
   html = `
     <div class="groupItem p-2 mb-2 shadow" ${options} id="${chatroomName.replace(" ", "_")}">
       <div class="row">
-        <div class="col-sm-4">
+        <div class="col-sm-3">
           <div class="groupImage rounded-circle bg-light" style="background-position: center center;background-size:cover;background-image:url(${src})">
           </div>
         </div
-        <div class="col-sm-8">
-          <h4>${chatroomName}</h4>
+        <div class="col-sm-9">
+          <p class="mt-1 ml-2 standardFont">${chatroomName}</p>
         </div>
       </div>
     </div>`
@@ -374,6 +384,14 @@ socket.on('private message', function(info){
   }
 })
 
+//check if profile picture for user exists
+function urlExists(url) {
+    var http = new XMLHttpRequest();
+    http.open('HEAD', url, false);
+    http.send();
+    return http.status!=404;
+}
+
 // Valid username/password
 socket.on('valid login', function(info){
     
@@ -382,7 +400,11 @@ socket.on('valid login', function(info){
   // Removes login page
   $('#loginModal').modal('hide')
 
-  
+  var usernamePath = username.replace(" ", "_");
+
+  if(urlExists(`../assets/${usernamePath}_icon.png`)) {  
+    $('#profileImg').css('background-image', `url(../assets/${usernamePath}_icon.png)`);
+  }
 
   // Looping through all the user's chatrooms
   for (var i = 0; i < info['chatrooms'].length; i++) {
@@ -420,10 +442,80 @@ socket.on('user state update', function(usernames){
     console.log("ADDING USER")
 
     option = `"privateMessage('` + usernames[i] + `')"`
+    src = `../assets/${usernames[i].replace(" ", "_")}_icon.png`
+    alt_src = '../assets/profile_placeholder.png'
 
-    html = `<a onclick=${option}><h4>${usernames[i]}</h4></a>`
+    if(urlExists(src)) {  
+      html = `
+      <div class="userItem p-2 mb-2" id="${usernames[i].replace(" ", "_")}">
+        <div class="row">
+          <div class="col-sm-3">
+            <div class="userImage rounded-circle bg-light" style="background-position: center center;background-size:cover;background-image:url(${src})">
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <p class="usersName standardFont">${usernames[i]} 
+            <br>
+            <span class="online standardFont">Online</span>
+            </p>
+          </div>
+          <div class="col-sm-3">
+            <button onclick=${option} class="userButton text-white shadow-sm">DM</button>
+          </div>
+        </div>
+      </div>`
+    }
+    else {
+      html = `
+      <div class="userItem p-2 mb-2" id="${usernames[i].replace(" ", "_")}">
+        <div class="row">
+          <div class="col-sm-3">
+            <div class="userImage rounded-circle bg-light" style="background-position: center center;background-size:cover;background-image:url(${alt_src})">
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <p class="usersName standardFont">${usernames[i]}
+            <br/>
+            <span class="online standardFont">Online</span>
+            </p>
+          </div>
+          <div class="col-sm-3">
+            <button onclick=${option} class="userButton text-white shadow-sm">DM</button>
+          </div>
+        </div>
+      </div>`
+    }
+
     $('#users').append(html)
   }
+})
+
+//update profile picture
+function updateProfile() {
+
+  file = document.getElementById('newProfilePic').files[0]
+
+  socket.emit('update profile', {
+    'pic' : file
+  })
+}
+
+// Response for updating profile picture
+socket.on('update profile response', function(res){
+
+  // TODO
+  if (res != 'success'){
+
+    console.log("Did not successfully update profile picture")
+    return
+  }
+
+  // Hiding modal and handling page refresh
+  console.log("Successfully updated profile picture")
+  $('#profileModal').modal('hide');
+
+  var usernamePath = username.replace(" ", "_");
+  $('#profileImg').css('background-image', `url(../assets/${usernamePath}_icon.png)`);
 })
 
 // automatically scroll to bottom of messages @ new message

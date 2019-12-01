@@ -34,7 +34,7 @@
           <div id="profileBar" class="shadow-sm">
             <i class="gradient-icon fas fa-comment-alt"></i> 
             <i class="left-icon fas fa-phone-alt"></i> <i class="left-icon fas fa-envelope"></i> <i class="left-icon fas fa-users"></i>
-            <div id="profileImg" class="rounded-circle bg-light" style="height:40px; width:40px; margin:20px; background-image:url('../assets/profile_placeholder.png');"></div>
+            <div id="profileImg" class="rounded-circle bg-light" onclick="$('#profileModal').modal('show')"></div>
           </div>
           <div class="row mt-3" id="groupsBar">
             <div class="col-sm-9 pt-2">
@@ -71,11 +71,11 @@
         </div>
 
         <!-- Active users -->
-        <nav id="sidebar" class="navbar-light bg-light sidebar-right">
-          <center>
-            <h3>Active Users</h3>
-            <ul id="users"></ul>
-          </center> 
+        <nav id="sidebar" class="navbar-light sidebar-right">
+          <div class="d-flex justify-content-center">
+            <h3 class="mt-4 mb-4">Active Users</h3>
+          </div>
+          <ul id="users"></ul>
         </nav>
         
         <!-- User login/registration -->
@@ -173,12 +173,32 @@
   
                 <input type="file" id="attachmentFile">
                 <br />
-                <button onclick="handleAttachment()" class="btn btn-outline-success" style="position:relative; top : 5px;">Send</button>
+                <button onclick="handleAttachment()" class="btn text-white" style="position:relative; top : 5px;">Send</button>
               </div>
             </div>
 
           </div>
         </div>
+
+        <!-- Modal for profile picture -->
+        <div id="profileModal" class="modal fade">
+          <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Edit Profile Picture</h4>
+              </div>
+              <div class="modal-body">
+
+                <input type="file" id="newProfilePic">
+                <br />
+                <button onclick="updateProfile()" id="updateProfile" class="btn mt-2" style="position:relative; top : 5px; color: white;">Update</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
     </div>
 
   </body>

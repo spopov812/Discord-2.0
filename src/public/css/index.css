@@ -121,7 +121,7 @@ button {
   font-family: 'Poppins', sans-sarif;
 }
 
-#groupButton:hover, #sendButton:hover {
+#groupButton:hover {
   opacity: 0.8;
 }
 
@@ -169,6 +169,10 @@ button {
   align-items: center;
 }
 
+#sendButton:hover {
+  opacity: 0.8;
+}
+
 .chatArea {
   flex: 1;
   display: flex;
@@ -194,6 +198,13 @@ button {
 #currentImg, #profileImg {
   background-position: center center;
   background-size:cover;
+}
+
+#profileImg {
+  height:45px; 
+  width:45px; 
+  margin:20px; 
+  background-image:url('../assets/profile_placeholder.png');
 }
 
 #profileImg:hover {
@@ -280,9 +291,46 @@ ul {
 }
 
 #users {
-  height: 70%;
+  height: 85%;
   width: 100%;
   overflow-y: auto;
+}
+
+.userItem {
+  margin-left: -30px;
+  height: 75px;
+  width: 320px;
+}
+
+.userImage {
+  width: 100%;
+  padding-top: 100%;
+  margin-left: 10%;
+}
+
+.usersName {
+  font-size: 15px;
+  margin-left: -5px;
+}
+
+.online {
+  opacity: 0.5;
+  font-size: 10px;
+}
+
+.userButton {
+  background: rgb(168,60,211);
+  background: linear-gradient(90deg, rgba(168,60,211,1) 32%, rgba(199,86,197,1) 66%, rgba(209,88,190,1) 84%);
+  width: 100%;
+  text-align: center;
+  font-size: 15px;
+  border-radius: 50px;
+  border: none;
+  margin-top: 10px;
+}
+
+.userButton:hover {
+  opacity: 0.8;
 }
 
 .usernameInput, p {

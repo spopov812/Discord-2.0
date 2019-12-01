@@ -335,6 +335,23 @@ io.on('connection', function(socket){
 		})
 	})
 
+  	// Socket listening for when a profile picture is updated
+  	socket.on('update profile', function(info){
+
+    	console.log("update profile triggered")
+    	var usernamePath = socketUsername.replace(' ', '_')
+
+    	// Writing the icon to disk
+    	fs.writeFile(`./src/public/assets/${usernamePath}_icon.png`, new Buffer(info['pic'], "base64"), function(err) {
+         	if(err){
+              console.log("Error: ", err)
+              return
+         	}
+         	console.log("image converted and saved to dir")
+      	})
+      	socket.emit('update profile response', 'success')
+   	})
+
 	// Socket listening for when a group is to be created
 	socket.on('create group', function(info){
 
