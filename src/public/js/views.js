@@ -299,25 +299,84 @@ function privateMessage(userToMessage) {
 function addMessage(info) {
 
   color = "style="
-
+  spacing = "style='margin-top:2px; margin-bottom:2px;'"
+  messagesChildren = document.getElementById("messages").children;
+  //if message is from current user
   if (info['username'] == username) {
-
-    color += '"color : green;"'
+    //add more spacing if last message was from different sender
+    if(messagesChildren.length > 0) {
+      if(messagesChildren[messagesChildren.length-1].classList.contains('otherMessage') || messagesChildren[messagesChildren.length-1].classList.contains('autoMessage')) {
+        spacing = "style='margin-top:30px; margin-bottom:2px;'"
+      }
+    }
+    html = `<li class="userMessage" ${spacing}><p class="userBubble m-0">${info['message']}</p></li>`
   }
-
+  //if message is automated message
   else if (info['username'] == 'AUTO') {
-
     color += '"color : red;"'
-  }
+    userClass = info['username'].replace(" ", "_")
+    sender = `<p class="sender p-0" ${color}>${info['username']} </p>`
+    messageImg = `<div class="messageImg rounded-circle bg-light" style="background-image: url('../assets/profile_placeholder.png')"></div>`
+    margins = "m-0"
 
+    //add more spacing if last message was from different sender
+    if(messagesChildren.length > 0) {
+      if(messagesChildren[messagesChildren.length-1].classList.contains('otherMessage') || messagesChildren[messagesChildren.length-1].classList.contains('userMessage')) {
+        sender = `<li class="senderItem"><p class="sender p-0" style="margin-top:30px;" ${color}>${info['username']}</p></li>`
+        messageImg = `<div class="messageImg rounded-circle bg-light" style="background-image: url('../assets/profile_placeholder.png')"></div>`
+      }
+      //don't display sender if last message was from same person
+      if(messagesChildren[messagesChildren.length-1].classList.contains(userClass)) {
+        sender = ""
+        messageImg = ""
+        margins = ""
+      }
+    }
+
+    html = `${sender}
+            <li class="autoMessage">
+              ${messageImg}
+              <p class="autoBubble ${margins}">${info['message']}</p>
+            </li>`
+  }
+  //if message is from another user in the room
   else{
     color += '"color : black;"'
+    userClass = info['username'].replace(" ", "_")
+    sender = `<li class="senderItem"><p class="sender p-0" ${color}>${info['username']}</p></li>`
+    messageImg = `<div class="messageImg rounded-circle bg-light" style="background-image: url('../assets/profile_placeholder.png')"></div>`
+    margins = "m-0"
+
+    //add more spacing if last message was from different sender
+    if(messagesChildren.length > 0) {
+      if(messagesChildren[messagesChildren.length-1].classList.contains('userMessage') || messagesChildren[messagesChildren.length-1].classList.contains('autoMessage')) {
+        sender = `<p class="sender p-0" style="margin-top:30px;" ${color}>${info['username']} </p>`
+        if(urlExists(`../assets/${userClass}_icon.png`)) {
+          console.log('profile pic exists')
+          messageImg = `<div class="messageImg rounded-circle bg-light" style="background-image:url('../assets/${userClass}_icon.png');"></div>`
+        }
+        else{
+          console.log('profile pic not found')
+          messageImg = `<div class="messageImg rounded-circle bg-light" style="background-image:url('../assets/profile_placeholder.png');"></div>`
+        }
+      }
+      //don't display sender if last message was from same person
+      if(messagesChildren[messagesChildren.length-1].classList.contains(userClass)) {
+        sender = ""
+        messageImg = ""
+        margins = ""
+      }
+    }
+
+    html = `${sender}
+            <li class="otherMessage ${userClass}">
+              ${messageImg}
+              <p class="otherBubble ${margins}">${info['message']}</p>
+            </li>`
+
   }
 
-  html = `<li class="p-0"><p class="p-0 m-0" ${color}>${info['username']}- </p><p class="p-0 m-0">${info['message']}</p></li><hr class="m-1" />`
-
   $('#messages').append(html)
-  window.scrollTo(0, document.body.scrollHeight)
 }
 
 socket.on('create account response', function(res){
